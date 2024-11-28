@@ -94,7 +94,19 @@ class ParkInnLodge {
     void createAccount(string name, string email, string password) : User(name, email, password) {}
     void addRoom(int roomNo, string roomType, double price) : Room(roomNo, roomType, price) {}
 
+    void editRoom() {
+      int roomNo;
+      int choice;
+      cout << "Enter room number of the room to edit: ";
+      cin >> roomNo;
 
+      bool found = false;
+      for (const auto& room: rooms) {
+        if (room.getRoomNo() == roomNo) {
+          found = true;
+        }
+      }
+    }
 
     virtual void viewBookingHistory () const {
       cout << "View Booking History: " << endl;
