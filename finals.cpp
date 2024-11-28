@@ -97,6 +97,6 @@ class ParkInnLodge {
 
 
     virtual void viewBookingHistory () const {
-      cout << "View Booking History: " << 
+      cout << "View Booking History: " << endl;
     }
 };
