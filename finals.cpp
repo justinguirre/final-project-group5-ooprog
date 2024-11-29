@@ -2,21 +2,42 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <optional>
 using namespace std;
 
 bool intIsValid(string input) {
-    if (input.empty() || input[0] == '-') {
-        return false;
+  if (input.empty() || input[0] == '-') {
+      return false;
+  }
+
+  for (char c : input) {
+    if (!isdigit(c)) {
+      return false;
+    }
+  }
+
+  int num = stoi(input);
+  return num > 0;
+}
+
+bool doubleIsValid(string input) {
+  if (input.empty() || input[0] == '-') {
+    return false;
+  }
+
+  bool hasDecPt = false;
+  for (char c : input) {
+    if (c == '.') {
+      hasDecPt = true;
     }
 
-    for (char c : input) {
-        if (!isdigit(c)) {
-            return false;
-        }
+    if ((!isdigit(c) && c != '.') || (c == '.' && hasDecPt)) {
+      return false;
     }
+  }
 
-    int num = stoi(input);
-    return num > 0;
+  double num = stod(input);
+  return stod > 0.0;
 }
 
 //Class User
@@ -106,7 +127,7 @@ class ParkInnLodge {
     vector(Room) rooms;
 
   public:
-    // construct objects
+    // construir los objetos
     void createAccount(string name, string email, string password) : User(name, email, password) {}
     void addRoom(int roomNo, string roomType, double price) : Room(roomNo, roomType, price) {}
 
@@ -118,10 +139,14 @@ class ParkInnLodge {
       cin.clear();
       cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
+      // initialize the variables needed to search for the room
       bool found = false;
+      optional<Room> foundRoom;
+
       for (const auto& room: rooms) {
         if (room.getRoomNo() == roomNo) {
           found = true;
+          foundRoom = room;
           break;
         }
       }
@@ -129,11 +154,7 @@ class ParkInnLodge {
         cout << left;
         cout << setw(15) << "NUMBER" << setw(20) << "TYPE" << setw(10) << "PRICE" << setw(15) "AVAILABLE?" << setw(15) << endl;
         cout << "-----------------------------------------------------------------------------------" << endl;
-        for (const auto& room: rooms) {
-          if (room.getRoomNo() == roomNo) {
-            cout << setw(15) << room.getRoomNo() << setw(20) << room.getRoomType() << setw(10) << room.getRoomPrice() << setw(15) << room.roomIsAvailable() << setw(15) << endl;
-          }
-        }
+        cout << setw(15) << foundRoom.getRoomNo() << setw(20) << foundRoom.getRoomType() << setw(10) << foundRoom.getRoomPrice() << setw(15) << foundRoom.roomIsAvailable() << setw(15) << endl;
         int editChoice;
         cout << "\nEdit Room:" << endl;
         cout << "[1] Number" << endl;
@@ -157,8 +178,9 @@ class ParkInnLodge {
               cout << "Enter new room number: ";
               getline(cin, newRoomNo);
               cin.clear();
-              cin.ignore(numeric_limits<streamsize>::max(), '\n');
+              cin.ignore(numeric_limits<streamsize>::max(), "\n");
 
+              // searches if new room number typed exists
               bool roomNoExists = false;
               for (const auto& iroom: rooms) {
                 if (iroom.getRoomNo() == newRoomNo) {
@@ -166,17 +188,28 @@ class ParkInnLodge {
                   break;
                 }
               }
-            } while ((!intIsValid(newRoomNo)) || (roomNoExists));
+            } while ((!intIsValid(to_string(newRoomNo))) || (roomNoExists));
 
             room.setRoomNo(newRoomNo);
+            cout << "Room number changed from Room " << roomNo << " to Room " << newRoomNo << "!" << endl;
             break;
           
           case 2:
             // edit room type
+            
+            // one possible way to do this is to delete the room to be edited and create a new room with the same parameters but the new type
             break;
 
           case 3:
             // edit room price
+            double newRoomPrice;
+            double oldRoomPrice = foundRoom.getRoomPrice();
+            do {
+              cout << "Enter new room price: ";
+              getline(cin, newRoomPrice);
+              cin.clear();
+              cin.ignore(numeric_limits<streamsize>::max(), "\n")
+            } while (!doubleIsValid(tostring(newRoomPrice)))
             break;
 
           case 4:
