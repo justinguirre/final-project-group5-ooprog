@@ -208,12 +208,22 @@ class ParkInnLodge {
               cout << "Enter new room price: ";
               getline(cin, newRoomPrice);
               cin.clear();
-              cin.ignore(numeric_limits<streamsize>::max(), "\n")
+              cin.ignore(numeric_limits<streamsize>::max(), "\n");
             } while (!doubleIsValid(tostring(newRoomPrice)))
             break;
 
           case 4:
             // edit room availability
+            int c4choice;
+            cout << "Current room availability: " << (foundRoom.roomIsAvailable ? "Available" : "Not Available") << endl;
+            do {
+              cout << "[1] " << (foundRoom.roomIsAvailable ? "Set to Not Available" : "Set to Available") << endl;
+              cout << "[0] Back"
+              cout << "INPUT: ";
+              getline(cin, c4choice);
+              cin.clear();
+              cin.ignore(numeric_limits<streamsize>::max(), "\n");
+            } while ((!intIsValid(tostring(c4choice))) && !(c4choice == 0 || c4choice == 1));
             break;
 
         }
