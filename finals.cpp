@@ -227,8 +227,44 @@ class ParkInnLodge {
             break;
 
         }
+      } else {
+        cout << "Room not found." << endl;
       }
 
+    }
+
+    void deleteRoom() {
+      int roomNo;
+      do {
+        cout << "Enter room number to delete: ";
+        getline(cin, roomNo);
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), "\n");
+      } while (!intIsValid(tostring(roomNo)));
+
+      // initialize the variables needed to search for the room
+      bool found = false;
+      char choice;
+      optional<Room> foundRoom;
+
+      for (const auto& room: rooms) {
+        if (room.getRoomNo() == roomNo) {
+          found = true;
+          foundRoom = room;
+          break;
+        }
+      }
+
+      if (found) {
+        cout << "Are you sure you want to delete this room? [Y/N]: ";
+        getline(cin, choice);
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), "\n");
+
+        if (choice == 'Y' || choice == 'y') {
+          rooms.erase(foundRoom);
+        }
+      }
     }
 
     virtual void viewBookingHistory () const {
