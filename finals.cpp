@@ -3,301 +3,323 @@
 #include <vector>
 #include <iomanip>
 #include <optional>
+#include <limits> // For numeric_limits
+
 using namespace std;
 
-bool intIsValid(string input) {
-  if (input.empty() || input[0] == '-') {
-      return false;
-  }
+// Utility functions for input validation
+bool intIsValid(const string& input) {
+    if (input.empty() || input[0] == '-') return false;
 
-  for (char c : input) {
-    if (!isdigit(c)) {
-      return false;
+    for (char c : input) {
+        if (!isdigit(c)) return false;
     }
-  }
 
-  int num = stoi(input);
-  return num > 0;
+    return stoi(input) > 0;
 }
 
-bool doubleIsValid(string input) {
-  if (input.empty() || input[0] == '-') {
-    return false;
-  }
+bool doubleIsValid(const string& input) {
+    if (input.empty() || input[0] == '-') return false;
 
-  bool hasDecPt = false;
-  for (char c : input) {
-    if (c == '.') {
-      hasDecPt = true;
+    bool hasDecimalPoint = false;
+    for (size_t i = 0; i < input.length(); i++) {
+        char c = input[i];
+        if (c == '.') {
+            if (hasDecimalPoint) return false; // Multiple decimal points
+            hasDecimalPoint = true;
+        } else if (!isdigit(c)) {
+            return false;
+        }
     }
 
-    if ((!isdigit(c) && c != '.') || (c == '.' && hasDecPt)) {
-      return false;
-    }
-  }
-
-  double num = stod(input);
-  return stod > 0.0;
+    return stod(input) > 0.0;
 }
 
-//Class Room
+// Class Room
 class Room {
-  private:
+private:
     int roomNo;
     string roomType;
     double price;
     bool isAvailable;
 
-  public:
-    // constructor
-    Room(int roomNo, string roomType, double price) : roomNo(roomNo), roomType(roomType), price(price), isAvailable(true) {}
+public:
+    Room(int roomNo, string roomType, double price)
+        : roomNo(roomNo), roomType(roomType), price(price), isAvailable(true) {}
 
-    //getter
-    int getRoomNo() {
-      return roomNo;
-    }
+    // Getters
+    int getRoomNo() const { return roomNo; }
+    string getRoomType() const { return roomType; }
+    double getRoomPrice() const { return price; }
+    bool roomIsAvailable() const { return isAvailable; }
 
-    string getRoomType() {
-      return roomType;
-    }
-
-    double getRoomPrice() {
-      return price;
-    }
-
-    bool roomIsAvailable() {
-      return isAvailable;
-    }
-
-    //setter
-    void setRoomNo(int roomNo) {
-      this -> roomNo = roomNo;
-    }
-
-    void setRoomType(string roomType) {
-      this -> roomType = roomType;
-    }
-
-    void setRoomPrice(double roomPrice) {
-      this -> price = roomPrice;
-    }
-
-    void setIsAvailable(bool isAvailable) {
-      this -> isAvailable = isAvailable;
-    }
+    // Setters
+    void setRoomNo(int roomNo) { this->roomNo = roomNo; }
+    void setRoomType(const string& roomType) { this->roomType = roomType; }
+    void setRoomPrice(double roomPrice) { this->price = roomPrice; }
+    void setIsAvailable(bool isAvailable) { this->isAvailable = isAvailable; }
 };
 
-//Class User
+// Class User
 class User {
-  protected: 
+protected:
     string name, email, password;
+    string role; // Role (e.g., "Customer" or "Employee")
 
-  //Constructor
-  public:
-    User(string name, string email, string password) : name(name), email(email), password(password) {}
+public:
+    User(const string& name, const string& email, const string& password, const string& role)
+        : name(name), email(email), password(password), role(role) {}
 
-    //Getters
-    string getName() const{
-      return name;
-    }
+    // Getters
+    string getName() const { return name; }
+    string getEmail() const { return email; }
+    string getRole() const { return role; }
 
-    string getEmail() const{
-      return email;
-    }
-    
-    //Setters
-    void setName(string name) {
-      this -> name = name;
-    }
-
-    void setEmail(string email) {
-      this -> email = email;
-    }
+    // Setters
+    void setName(const string& name) { this->name = name; }
+    void setEmail(const string& email) { this->email = email; }
 };
 
-class Customer : public User {
-  private:
-    vector<Booking> bookingHistory;
-    
-};
-
+// Derived class Employee
 class Employee : public User {
-  public:
-    Employee(string name, string email, string password) : User(name, email, password) {}
+public:
+    Employee(const string& name, const string& email, const string& password)
+        : User(name, email, password, "Employee") {}
 
-    void addRoom() {
-      int roomNo;
-      bool roomNoExists = false;
-      do {
-        cout << "Enter room number: ";
-        getline(cin, roomNo);
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    // Add a room to the system
+    void addRoom(vector<Room>& rooms) {
+        int roomNo;
+        string roomNoInput;
+        string roomType;
+        double price;
+        string priceInput;
 
-        // searches if new room number typed exists
-        for (const auto& iroom: rooms) {
-          if (iroom.getRoomNo() == newRoomNo) {
-            roomNoExists = true;
-            break;
-          }
-        }
-      } while ((!intIsValid(to_string(roomNo))) && roomNoExists);
-    }
-}
+        // Input and validate room number
+        do {
+            cout << "Enter room number (positive integer): ";
+            cin >> roomNoInput;
 
-class ParkInnLodge {
-  private:
-    vector(User) users;
-    vector(Room) rooms;
+            if (!intIsValid(roomNoInput)) {
+                cout << "Invalid room number. Please enter a positive integer.\n";
+                continue;
+            }
 
-  public:
-    // construir los objetos
-    void createAccount(string name, string email, string password) : User(name, email, password) {}
-    void addRoom(int roomNo, string roomType, double price, string role) {
-      if (role == "Employee") {
-        Room(roomNo, roomType, price);
-      } else {
-        cout << "Access denied!" << endl;
-      }
-    }
+            roomNo = stoi(roomNoInput);
 
-    void editRoom() {
-      int roomNo;
-      int choice;
-      cout << "Enter room number of the room to edit: ";
-      getline(cin, roomNo);
-      cin.clear();
-      cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-      // initialize the variables needed to search for the room
-      bool found = false;
-      optional<Room> foundRoom;
-
-      for (const auto& room: rooms) {
-        if (room.getRoomNo() == roomNo) {
-          found = true;
-          foundRoom = room;
-          break;
-        }
-      }
-      if (found) {
-        cout << left;
-        cout << setw(15) << "NUMBER" << setw(20) << "TYPE" << setw(10) << "PRICE" << setw(15) "AVAILABLE?" << setw(15) << endl;
-        cout << "-----------------------------------------------------------------------------------" << endl;
-        cout << setw(15) << foundRoom.getRoomNo() << setw(20) << foundRoom.getRoomType() << setw(10) << foundRoom.getRoomPrice() << setw(15) << foundRoom.roomIsAvailable() << setw(15) << endl;
-        int editChoice;
-        cout << "\nEdit Room:" << endl;
-        cout << "[1] Number" << endl;
-        cout << "[2] Type" << endl;
-        cout << "[3] Price" << endl;
-        cout << "[4] Availability" << endl;
-        cout << "[0] Return to Home" << endl;
-        cout << "INPUT: " << endl;
-        getline(cin, editChoice);
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        switch (editChoice) {
-          case 0:
-            // return to home
-            return;
-          case 1:
-            // edit room no
-            int newRoomNo;
-            bool roomNoExists = false;
-            do {
-              cout << "Enter new room number: ";
-              getline(cin, newRoomNo);
-              cin.clear();
-              cin.ignore(numeric_limits<streamsize>::max(), "\n");
-
-              // searches if new room number typed exists
-              for (const auto& iroom: rooms) {
-                if (iroom.getRoomNo() == newRoomNo) {
-                  roomNoExists = true;
-                  break;
+            // Check if room number already exists
+            bool roomExists = false;
+            for (const auto& room : rooms) {
+                if (room.getRoomNo() == roomNo) {
+                    roomExists = true;
+                    cout << "Room number already exists. Please enter a unique room number.\n";
+                    break;
                 }
-              }
-            } while ((!intIsValid(to_string(newRoomNo))) || (roomNoExists));
+            }
 
-            room.setRoomNo(newRoomNo);
-            cout << "Room number changed from Room " << roomNo << " to Room " << newRoomNo << "!" << endl;
-            break;
-          
-          case 2:
-            // edit room type
-            
-            // one possible way to do this is to delete the room to be edited and create a new room with the same parameters but the new type
-            break;
+            if (!roomExists) {
+                break; // Valid and unique room number
+            }
 
-          case 3:
-            // edit room price
-            double newRoomPrice;
-            double oldRoomPrice = foundRoom.getRoomPrice();
-            do {
-              cout << "Enter new room price: ";
-              getline(cin, newRoomPrice);
-              cin.clear();
-              cin.ignore(numeric_limits<streamsize>::max(), "\n");
-            } while (!doubleIsValid(tostring(newRoomPrice)))
-            break;
+        } while (true);
 
-          case 4:
-            // edit room availability
-            int c4choice;
-            cout << "Current room availability: " << (foundRoom.roomIsAvailable ? "Available" : "Not Available") << endl;
-            do {
-              cout << "[1] " << (foundRoom.roomIsAvailable ? "Set to Not Available" : "Set to Available") << endl;
-              cout << "[0] Back"
-              cout << "INPUT: ";
-              getline(cin, c4choice);
-              cin.clear();
-              cin.ignore(numeric_limits<streamsize>::max(), "\n");
-            } while ((!intIsValid(tostring(c4choice))) && !(c4choice == 0 || c4choice == 1));
-            break;
+        // Input and validate room type
+        cin.ignore(); // Clear input buffer
+        do {
+            cout << "Enter room type (non-empty): ";
+            getline(cin, roomType);
 
-        }
-      } else {
-        cout << "Room not found." << endl;
-      }
+            if (roomType.empty()) {
+                cout << "Room type cannot be empty. Please try again.\n";
+            } else {
+                break; // Valid room type
+            }
+        } while (true);
 
+        // Input and validate room price
+        do {
+            cout << "Enter room price (positive decimal): ";
+            cin >> priceInput;
+
+            if (!doubleIsValid(priceInput)) {
+                cout << "Invalid price. Please enter a positive decimal value.\n";
+                continue;
+            }
+
+            price = stod(priceInput);
+            break; // Valid room price
+        } while (true);
+
+        // Create and add Room object
+        rooms.emplace_back(Room(roomNo, roomType, price));
+        cout << "Room added successfully!\n";
     }
 
-    void deleteRoom() {
-      int roomNo;
-      do {
-        cout << "Enter room number to delete: ";
-        getline(cin, roomNo);
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), "\n");
-      } while (!intIsValid(tostring(roomNo)));
+    // Edit a room in the system
+    void editRoom(vector<Room>& rooms) {
+        int roomNo;
+        string roomNoInput;
+        cout << "Enter the room number of the room to edit: ";
+        cin >> roomNoInput;
 
-      // initialize the variables needed to search for the room
-      bool found = false;
-      char choice;
-      optional<Room> foundRoom;
-
-      for (const auto& room: rooms) {
-        if (room.getRoomNo() == roomNo) {
-          found = true;
-          foundRoom = room;
-          break;
+        if (!intIsValid(roomNoInput)) {
+            cout << "Invalid room number. Please enter a positive integer.\n";
+            return;
         }
-      }
 
-      if (found) {
-        cout << "Are you sure you want to delete this room? [Y/N]: ";
-        getline(cin, choice);
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), "\n");
+        roomNo = stoi(roomNoInput);
 
-        if (choice == 'Y' || choice == 'y') {
-          rooms.erase(foundRoom);
+        // Search for the room
+        auto it = find_if(rooms.begin(), rooms.end(), [&](const Room& room) {
+            return room.getRoomNo() == roomNo;
+        });
+
+        if (it == rooms.end()) {
+            cout << "Room not found.\n";
+            return;
         }
-      }
+
+        // Edit options
+        int choice;
+        cout << "Editing Room #" << roomNo << ":\n";
+        cout << "[1] Edit Room Type\n";
+        cout << "[2] Edit Room Price\n";
+        cout << "[3] Edit Availability\n";
+        cout << "[0] Cancel\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1: {
+            string newType;
+            cin.ignore();
+            cout << "Enter new room type: ";
+            getline(cin, newType);
+            it->setRoomType(newType);
+            cout << "Room type updated successfully!\n";
+            break;
+        }
+        case 2: {
+            string newPriceInput;
+            double newPrice;
+            do {
+                cout << "Enter new room price: ";
+                cin >> newPriceInput;
+                if (!doubleIsValid(newPriceInput)) {
+                    cout << "Invalid price. Please enter a positive decimal value.\n";
+                    continue;
+                }
+                newPrice = stod(newPriceInput);
+                break;
+            } while (true);
+
+            it->setRoomPrice(newPrice);
+            cout << "Room price updated successfully!\n";
+            break;
+        }
+        case 3: {
+            int availability;
+            cout << "Enter availability (1 for Available, 0 for Not Available): ";
+            cin >> availability;
+            it->setIsAvailable(availability == 1);
+            cout << "Room availability updated successfully!\n";
+            break;
+        }
+        case 0:
+            cout << "Edit canceled.\n";
+            break;
+        default:
+            cout << "Invalid choice.\n";
+        }
     }
 
-    virtual void viewBookingHistory () const {
-      cout << "View Booking History: " << endl;
+    // Delete a room in the system
+    void deleteRoom(vector<Room>& rooms) {
+        int roomNo;
+        string roomNoInput;
+        cout << "Enter the room number of the room to delete: ";
+        cin >> roomNoInput;
+
+        if (!intIsValid(roomNoInput)) {
+            cout << "Invalid room number. Please enter a positive integer.\n";
+            return;
+        }
+
+        roomNo = stoi(roomNoInput);
+
+        // Search for the room
+        auto it = find_if(rooms.begin(), rooms.end(), [&](const Room& room) {
+            return room.getRoomNo() == roomNo;
+        });
+
+        if (it == rooms.end()) {
+            cout << "Room not found.\n";
+            return;
+        }
+
+        rooms.erase(it);
+        cout << "Room deleted successfully!\n";
+    }
+};
+
+// Main system class: ParkInnLodge
+class ParkInnLodge {
+private:
+    vector<User> users;
+    vector<Room> rooms;
+
+public:
+    // Function to allow an employee to manage rooms
+    void manageRooms(Employee& employee) {
+        int choice;
+        do {
+            cout << "Room Management:\n";
+            cout << "[1] Add Room\n";
+            cout << "[2] Edit Room\n";
+            cout << "[3] Delete Room\n";
+            cout << "[0] Exit\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+            case 1:
+                employee.addRoom(rooms);
+                break;
+            case 2:
+                employee.editRoom(rooms);
+                break;
+            case 3:
+                employee.deleteRoom(rooms);
+                break;
+            case 0:
+                cout << "Exiting room management.\n";
+                return;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+            }
+        } while (true);
+    }
+
+    void createAccount(const string& name, const string& email, const string& password, const string& role) {
+        users.emplace_back(name, email, password, role);
+    }
+
+    // Display rooms
+    void viewRooms() const {
+        if (rooms.empty()) {
+            cout << "No rooms available.\n";
+            return;
+        }
+
+        cout << left << setw(15) << "ROOM NO" << setw(20) << "ROOM TYPE"
+             << setw(10) << "PRICE" << setw(15) << "AVAILABILITY" << "\n";
+        cout << "----------------------------------------------------------\n";
+
+        for (const auto& room : rooms) {
+            cout << left << setw(15) << room.getRoomNo()
+                 << setw(20) << room.getRoomType()
+                 << setw(10) << room.getRoomPrice()
+                 << setw(15) << (room.roomIsAvailable() ? "Available" : "Not Available")
+                 << "\n";
+        }
     }
 };
