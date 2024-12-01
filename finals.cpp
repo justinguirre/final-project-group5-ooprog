@@ -40,40 +40,6 @@ bool doubleIsValid(string input) {
   return stod > 0.0;
 }
 
-//Class User
-class User {
-  protected: 
-    string name, email, password;
-
-  //Constructor
-  public:
-    User(string name, string email, string password) : name(name), email(email), password(password) {}
-
-    //Getters
-    string getName() const{
-      return name;
-    }
-
-    string getEmail() const{
-      return email;
-    }
-    
-    //Setters
-    void setName(string name) {
-      this -> name = name;
-    }
-
-    void setEmail(string email) {
-      this -> email = email;
-    }
-};
-
-class Customer : public User {
-  private:
-    vector<Booking> bookingHistory;
-    
-}
-
 //Class Room
 class Room {
   private:
@@ -121,6 +87,64 @@ class Room {
     }
 };
 
+//Class User
+class User {
+  protected: 
+    string name, email, password;
+
+  //Constructor
+  public:
+    User(string name, string email, string password) : name(name), email(email), password(password) {}
+
+    //Getters
+    string getName() const{
+      return name;
+    }
+
+    string getEmail() const{
+      return email;
+    }
+    
+    //Setters
+    void setName(string name) {
+      this -> name = name;
+    }
+
+    void setEmail(string email) {
+      this -> email = email;
+    }
+};
+
+class Customer : public User {
+  private:
+    vector<Booking> bookingHistory;
+    
+};
+
+class Employee : public User {
+  public:
+    Employee(string name, string email, string password) : User(name, email, password) {}
+
+    void addRoom() {
+      int roomNo;
+      bool roomNoExists = false;
+      do {
+        cout << "Enter room number: ";
+        getline(cin, roomNo);
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        // searches if new room number typed exists
+        for (const auto& iroom: rooms) {
+          if (iroom.getRoomNo() == newRoomNo) {
+            roomNoExists = true;
+            break;
+          }
+        }
+      } while ((!intIsValid(to_string(roomNo))) && roomNoExists);
+    }
+}
+
 class ParkInnLodge {
   private:
     vector(User) users;
@@ -129,7 +153,13 @@ class ParkInnLodge {
   public:
     // construir los objetos
     void createAccount(string name, string email, string password) : User(name, email, password) {}
-    void addRoom(int roomNo, string roomType, double price) : Room(roomNo, roomType, price) {}
+    void addRoom(int roomNo, string roomType, double price, string role) {
+      if (role == "Employee") {
+        Room(roomNo, roomType, price);
+      } else {
+        cout << "Access denied!" << endl;
+      }
+    }
 
     void editRoom() {
       int roomNo;
@@ -174,6 +204,7 @@ class ParkInnLodge {
           case 1:
             // edit room no
             int newRoomNo;
+            bool roomNoExists = false;
             do {
               cout << "Enter new room number: ";
               getline(cin, newRoomNo);
@@ -181,7 +212,6 @@ class ParkInnLodge {
               cin.ignore(numeric_limits<streamsize>::max(), "\n");
 
               // searches if new room number typed exists
-              bool roomNoExists = false;
               for (const auto& iroom: rooms) {
                 if (iroom.getRoomNo() == newRoomNo) {
                   roomNoExists = true;
