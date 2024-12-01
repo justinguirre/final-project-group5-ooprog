@@ -35,6 +35,15 @@ bool doubleIsValid(const string& input) {
     return stod(input) > 0.0;
 }
 
+string toUpper(string str) {
+    for (int i = 0; i < str.length(); i++) {
+        if (str[i] >= 'a' && str[i] <= 'z') {
+            str[i] = str[i] - 32; // Convert lowercase to uppercase
+        }
+    }
+    return str;
+}
+
 // Class Room
 class Room {
 private:
@@ -84,7 +93,7 @@ public:
 class Employee : public User {
 public:
     Employee(const string& name, const string& email, const string& password)
-        : User(name, email, password, "Employee") {}
+        : User(name, email, password, "EMPLOYEE") {}
 
     // Add a room to the system
     void addRoom(vector<Room>& rooms) {
@@ -261,6 +270,85 @@ public:
     }
 };
 
+class Customer : public User {
+    private:
+        vector<Booking> bookingHistory;
+        vector<Payment> paymentHistory;
+        vector<Booking> currentBookings;
+    
+    public:
+        Customer(string name, string email, string password) : User(name, email, password, "CUSTOMER") {}
+
+        void addPayment() {
+            int choice;
+            string ccno, ccexpy, ccvcode, gcno;
+
+            do {
+                cout << "\nAdd Payment\n";
+                cout << "[1] Credit or Debit Card\n";
+                cout << "[2] GCash\n";
+                cout << "[0] Back\n";
+                cout << "INPUT: ";
+                string input;
+                getline(cin, input);
+
+                // Validate input to ensure it's an integer between 0 and 2
+                if (intIsValid(input)) {
+                    choice = stoi(input);
+                } else {
+                    cout << "Invalid choice. Please enter 0, 1, or 2.\n";
+                    choice = -1; // Reset choice to an invalid state
+                }
+            } while (choice < 0 || choice > 2);
+
+            switch (choice) {
+                case 1: // Credit or Debit Card
+                    do {
+                        cout << "\nEnter Credit/Debit Card Number (16 digits): ";
+                        getline(cin, ccno);
+                    } while (ccno.length() != 16 || !intIsValid(ccno));
+
+                    do {
+                        cout << "Enter Expiry Year (YYYY, current or future): ";
+                        getline(cin, ccexpy);
+                        // Ensure year is valid and in the future
+                        if (intIsValid(ccexpy)) {
+                            int year = stoi(ccexpy);
+                            int currentYear = 2024; // Replace with dynamic year retrieval if needed
+                            if (year >= currentYear) {
+                                break;
+                            }
+                        }
+                        cout << "Invalid expiry year. Please enter a valid year.\n";
+                    } while (true);
+
+                    do {
+                        cout << "Enter CVV Code (3 digits): ";
+                        getline(cin, ccvcode);
+                    } while ((ccvcode.length() != 3 || ccvcode.length() != 4) || !intIsValid(ccvcode));
+
+                    cout << "\nPayment added successfully with Credit/Debit Card.\n";
+                    break;
+
+                case 2: // GCash
+                    do {
+                        cout << "\nEnter GCash Number (11 digits): ";
+                        getline(cin, gcno);
+                    } while (gcno.length() != 11 || !intIsValid(gcno));
+
+                    cout << "\nPayment added successfully with GCash.\n";
+                    break;
+
+                case 0: // Back
+                    cout << "\nReturning to the previous menu.\n";
+                    break;
+
+                default:
+                    cout << "Unexpected error.\n";
+            }
+        }
+};
+
 // Main system class: ParkInnLodge
 class ParkInnLodge {
 private:
@@ -299,7 +387,49 @@ public:
         } while (true);
     }
 
-    void createAccount(const string& name, const string& email, const string& password, const string& role) {
+    void createAccount() {
+        string name;
+        string email;
+        string password;
+        string confirmPass;
+        string account_type;
+        cout << "Enter name: ";
+        getline(cin, name);
+        cin.clear();
+        cin.ignore();
+        cout << "Enter email: ";
+        getline(cin, name);
+        cin.clear();
+        cin.ignore();
+
+        do {
+            cout << "Enter password: ";
+            getline(cin, password);
+            cin.clear();
+            cin.ignore();
+            cout << "Confirm password: ";
+            getline(cin, confirmPass);
+            cin.clear();
+            cin.ignore();
+        } while (password != confirmPass);
+
+        do {
+            cout << "Account type\n";
+            cout << "- Customer\n";
+            cout << "- Employee\n";
+            cout << "INPUT: ";
+            getline(cin, account_type);
+            account_type = toUpper(account_type);
+            cin.clear();
+            cin.ignore();
+        } while (!(account_type == "CUSTOMER" || account_type == "EMPLOYEE"));
+
+        if (account_type == "EMPLOYEE") {
+            Employee(name, email, password);
+        } else {
+            Customer(name, email, password);
+        }
+
         users.emplace_back(name, email, password, role);
     }
 
