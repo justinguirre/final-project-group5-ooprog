@@ -45,6 +45,8 @@ string toUpper(string str) {
     return str;
 }
 
+class ParkInnLodge;
+
 // Class Room
 class Room {
 private:
@@ -87,7 +89,7 @@ public:
     string getRole() const { return role; }
 
     // Setters
-    virtual void setName() = 0
+    virtual void setName() = 0;
     virtual void setEmail() = 0;
     virtual void setPassword() = 0;
 
@@ -308,7 +310,7 @@ public:
 
                 emailEntered = toUpper(emailEntered);
 
-                if (emailEentered.empty()) {
+                if (emailEntered.empty()) {
                     cout << "Email cannot be empty!\n" << endl;
                 }
             } while (emailEntered.empty());
@@ -357,6 +359,67 @@ public:
                 ParkInnLodge.createAccount(Employee(nameEntered, emailEntered, passwordEntered));
             }
         }
+
+    void deleteAccount() override {
+        string email, choice1, choice2, passEntered, passConfirm;
+        bool acctFound = false;
+
+        cout << "Delete Account:\n";
+
+        do {
+            cout << "Enter email address of account to delete: ";
+            getline(cin, email);
+
+            auto it = find_if(users.begin(), users.end(), [&](const User& user) {
+                return user.getEmail() == email;
+            });
+
+            if (it != users.end()) {
+                // email found;
+                acctFound = true;
+                User& user = *it;
+                
+                cout << "Are you sure you want to delete this account? Type 'YES' to confirm: ";
+                getline(cin, choice1);
+                cin.clear();
+                cin.ignore();
+
+                choice1 = toUpper(choice1);
+
+                cout << "NOTE: For security purposes, entering an incorrect password will automatically cancel the account deletion." << endl;
+
+                if (choice1 == "YES") {
+                    cout << "Enter password to delete account (case-sensitive): ";
+                    getline(cin, passEntered);
+                    cin.clear();
+                    cin.ignore();
+
+                    if (passEntered == user.getPassword()) {
+                        cout << "Are you REALLY sure you want to delete this account? Type 'YES' to confirm: ";
+                        getline(cin, choice2);
+                        cin.clear();
+                        cin.ignore();
+
+                        choice2 = toUpper(choice2);
+
+                        if (choice2 == "YES") {
+                            cout << "Confirm password to delete account: ";
+                            getline(cin, passConfirm);
+                            cin.clear();
+                            cin.ignore();
+
+                            if (passConfirm == user.getPassword() && passEntered == getPassword()) {
+                                ParkInnLodge.deleteAccount(it);
+                                cout << "Successfully deleted account.\n" << endl;
+                            }
+                        }
+                    }
+                }
+            } else {
+                cout << "Account does not exist!\n" << endl;;
+            } while (acctFound == false);
+        }
+    }
 };
 
 class Customer : public User {
@@ -701,3 +764,9 @@ public:
         }
     }
 };
+
+int main() {
+    ParkInnLodge lodge;
+
+    
+}
