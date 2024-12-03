@@ -63,6 +63,10 @@ public:
     Customer(string n, string e, string p)
         : User(n, e, p, "Customer") {}
 
+    void createAccount() override {
+        
+    }
+
     void bookRoom(int roomNo) {
         currentBookings.push_back(roomNo);
         bookingHistory.push_back("Booked room " + to_string(roomNo));
@@ -180,6 +184,7 @@ void displayCustomerMenu(Customer *customer, ParkInnLodge *lodge) {
         cout << "3. View Booking History\n";
         cout << "4. View Available Rooms\n";
         cout << "5. Sign-out\n";
+        cout << "6. Create Account\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -188,9 +193,30 @@ void displayCustomerMenu(Customer *customer, ParkInnLodge *lodge) {
             int roomNo;
             cout << "Enter room number to book: ";
             cin >> roomNo;
-            customer->bookRoom(roomNo);
+
+            // Check if the room exists and if it is available
+            bool roomFound = false;
+            bool roomAvailable = false;
+            for (Room* room : lodge->getRooms()) {  // Assuming parkInn is an instance of ParkInn
+                if (room->getRoomNo() == roomNo) {
+                    roomFound = true;
+                    if (room->getRoomAvailability()) {
+                        roomAvailable = true;
+                    }
+                    break;
+                }
+            }
+
+            if (!roomFound) {
+                cout << "Room number " << roomNo << " does not exist.\n";
+            } else if (!roomAvailable) {
+                cout << "Room number " << roomNo << " is already booked.\n";
+            } else {
+                customer->bookRoom(roomNo);  // Proceed with booking
+            }
             break;
         }
+
         case 2: {
             int roomNo;
             cout << "Enter room number to cancel: ";
@@ -206,6 +232,24 @@ void displayCustomerMenu(Customer *customer, ParkInnLodge *lodge) {
             break;
         case 5:
             cout << "Signing out...\n";
+            break;
+        case 6:
+            cout << "Creating Customer Account\n";
+            // Logic to create a new customer account (e.g., input name, email, password)
+            string name, email, password;
+            cout << "Enter name: ";
+            cin >> name;
+            setName(name);
+            cout << "Enter email: ";
+            cin >> email;
+            setEmail(email);
+            cout << "Enter password: ";
+            cin >> password;
+            setPassword(password);
+            // Store account in a data structure, or any other method of saving the account
+            Customer *newCustomer(name, email, password);
+            parkInn.createAccount(newCustomer);
+            cout << "Customer account created successfully!\n";
             break;
         default:
             cout << "Invalid choice. Please try again.\n";
@@ -224,6 +268,7 @@ void displayEmployeeMenu(Employee *employee, ParkInnLodge *lodge) {
         cout << "4. View Check-Ins and Check-Outs\n";
         cout << "5. View Analytics\n";
         cout << "6. Sign-out\n";
+        cout << "7. Create Account\n"
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -256,6 +301,24 @@ void displayEmployeeMenu(Employee *employee, ParkInnLodge *lodge) {
             break;
         case 6:
             cout << "Signing out...\n";
+            break;
+        case 7:
+            cout << "Creating Customer Account\n";
+            // Logic to create a new customer account (e.g., input name, email, password)
+            string name, email, password;
+            cout << "Enter name: ";
+            cin >> name;
+            setName(name);
+            cout << "Enter email: ";
+            cin >> email;
+            setEmail(email);
+            cout << "Enter password: ";
+            cin >> password;
+            setPassword(password);
+            // Store account in a data structure, or any other method of saving the account
+            Customer *newCustomer(name, email, password);
+            parkInn.createAccount(newCustomer);
+            cout << "Customer account created successfully!\n";
             break;
         default:
             cout << "Invalid choice. Please try again.\n";
