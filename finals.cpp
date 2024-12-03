@@ -104,6 +104,58 @@ public:
     }
 };
 
+class Booking {
+private:
+    vector<int> rooms;  
+    double totalPrice;
+    string fromDate;
+    string toDate;
+    int numberOfGuests;
+    string paymentMethod;
+
+public:
+    Booking(vector<int> rooms, double totalPrice, string fromDate, string toDate, int guests, string payment) 
+        : rooms(rooms), totalPrice(totalPrice), fromDate(fromDate), toDate(toDate), 
+          numberOfGuests(guests), paymentMethod(payment) {}
+
+    vector<int> getRooms() const {
+        return rooms;
+    }
+
+    double getTotalPrice() const {
+        return totalPrice;
+    }
+
+    string getFromDate() const {
+        return fromDate;
+    }
+
+    string getToDate() const {
+        return toDate;
+    }
+
+    int getNumberOfGuests() const {
+        return numberOfGuests;
+    }
+
+    string getPaymentMethod() const {
+        return paymentMethod;
+    }
+
+    void updateDates(string newFromDate, string newToDate) {
+        fromDate = newFromDate;
+        toDate = newToDate;
+    }
+
+    void updateRoom(vector<int> newRooms) {
+        rooms = newRooms;
+    }
+
+    void updateGuests(int newNumberOfGuests) {
+        numberOfGuests = newNumberOfGuests;
+    }
+};
+
 // Function to display all available rooms
 void displayAvailableRooms(const vector<Room *> &rooms) {
     cout << "----------Park Inn Lodge Available Rooms----------\n" << endl;
