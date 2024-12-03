@@ -3,25 +3,6 @@
 #include <string>
 using namespace std;
 
-// Base class: Room
-class Room {
-protected:
-    int roomNo;
-    string roomType;
-    double price;
-    bool isAvailable;
-
-public:
-    Room(int no, string type, double p)
-        : roomNo(no), roomType(type), price(p), isAvailable(true) {}
-
-    int getRoomNo() { return roomNo; }
-    string getRoomType() { return roomType; }
-    double getRoomPrice() { return price; }
-    bool getRoomAvailability() { return isAvailable; }
-    void setRoomAvailability(bool available) { isAvailable = available; }
-};
-
 // Base class: User
 class User {
 protected:
@@ -121,6 +102,25 @@ public:
     }
 };
 
+// Base class: Room
+class Room {
+protected:
+    int roomNo;
+    string roomType;
+    double price;
+    bool isAvailable;
+
+public:
+    Room(int no, string type, double p)
+        : roomNo(no), roomType(type), price(p), isAvailable(true) {}
+
+    int getRoomNo() { return roomNo; }
+    string getRoomType() { return roomType; }
+    double getRoomPrice() { return price; }
+    bool getRoomAvailability() { return isAvailable; }
+    void setRoomAvailability(bool available) { isAvailable = available; }
+};
+
 // Derived class: StandardRoom
 class StandardRoom : public Room {
 public:
@@ -168,135 +168,4 @@ public:
     vector<Room *> &getRooms() { return rooms; }
 
     vector<User *> &getUsers() { return users; }
-};
-
-// Display menu for customers
-void displayCustomerMenu(Customer *customer, ParkInnLodge *lodge) {
-    int choice;
-    do {
-        cout << "\n--- Customer Menu ---\n";
-        cout << "1. Book Room\n";
-        cout << "2. Cancel Booking\n";
-        cout << "3. View Booking History\n";
-        cout << "4. View Available Rooms\n";
-        cout << "5. Sign-out\n";
-        cout << "Enter your choice: ";
-        cin >> choice;
-
-        switch (choice) {
-        case 1: {
-            int roomNo;
-            cout << "Enter room number to book: ";
-            cin >> roomNo;
-            customer->bookRoom(roomNo);
-            break;
-        }
-        case 2: {
-            int roomNo;
-            cout << "Enter room number to cancel: ";
-            cin >> roomNo;
-            customer->cancelBooking(roomNo);
-            break;
-        }
-        case 3:
-            customer->viewBookingHistory();
-            break;
-        case 4:
-            lodge->viewAvailableRooms();
-            break;
-        case 5:
-            cout << "Signing out...\n";
-            break;
-        default:
-            cout << "Invalid choice. Please try again.\n";
-        }
-    } while (choice != 5);
-}
-
-// Display menu for employees
-void displayEmployeeMenu(Employee *employee, ParkInnLodge *lodge) {
-    int choice;
-    do {
-        cout << "\n--- Employee Menu ---\n";
-        cout << "1. Add Room\n";
-        cout << "2. Delete Room\n";
-        cout << "3. View Available Rooms\n";
-        cout << "4. View Check-Ins and Check-Outs\n";
-        cout << "5. View Analytics\n";
-        cout << "6. Sign-out\n";
-        cout << "Enter your choice: ";
-        cin >> choice;
-
-        switch (choice) {
-        case 1: {
-            int roomNo;
-            double price;
-            cout << "Enter room number: ";
-            cin >> roomNo;
-            cout << "Enter room price: ";
-            cin >> price;
-            employee->addRoom(lodge->getRooms(), new StandardRoom(roomNo, price));
-            break;
-        }
-        case 2: {
-            int roomNo;
-            cout << "Enter room number to delete: ";
-            cin >> roomNo;
-            employee->deleteRoom(lodge->getRooms(), roomNo);
-            break;
-        }
-        case 3:
-            lodge->viewAvailableRooms();
-            break;
-        case 4:
-            employee->viewCheckInOut();
-            break;
-        case 5:
-            employee->viewAnalytics();
-            break;
-        case 6:
-            cout << "Signing out...\n";
-            break;
-        default:
-            cout << "Invalid choice. Please try again.\n";
-        }
-    } while (choice != 6);
-}
-
-// Main function
-int main() {
-    ParkInnLodge parkInn;
-
-    // Add users
-    Customer *customer1 = new Customer("John Doe", "john@example.com", "password123");
-    Employee *employee1 = new Employee("Alice Smith", "alice@example.com", "password123");
-    parkInn.createAccount(customer1);
-    parkInn.createAccount(employee1);
-
-    bool isRunning = true;
-
-    while (isRunning) {
-        cout << "PARKINNLODGE LOGIN PORTAL (Type -1 to exit.)" << endl;
-        string email, password;
-        cout << "Enter email: ";
-        cin >> email;
-        if (email == "-1") {
-            cout << "Exiting program..." << endl;
-            break;
-        }
-        cout << "Enter password: ";
-        cin >> password;
-
-        // Attempt to login
-        User* loggedInUser = User::login(parkInn.getUsers(), email, password);
-        
-        if (loggedInUser != nullptr) {
-            if (loggedInUser->getRole() == "Customer") {
-                displayCustomerMenu(dynamic_cast<Customer*>(loggedInUser), &parkInn);
-            } else if (loggedInUser->getRole() == "Employee") {
-                displayEmployeeMenu(dynamic_cast<Employee*>(loggedInUser), &parkInn);
-            }
-        }
-    }
-    return 0;
 };
