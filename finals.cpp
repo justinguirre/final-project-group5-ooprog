@@ -3,24 +3,114 @@
 #include <string>
 using namespace std;
 
-// Base class: Room
 class Room {
 protected:
-    int roomNo;
+    string roomNo;
     string roomType;
     double price;
     bool isAvailable;
 
 public:
-    Room(int no, string type, double p)
-        : roomNo(no), roomType(type), price(p), isAvailable(true) {}
+    Room() : roomNo(""), roomType(""), price(0.0), isAvailable(true) {}
 
-    int getRoomNo() { return roomNo; }
-    string getRoomType() { return roomType; }
-    double getRoomPrice() { return price; }
-    bool getRoomAvailability() { return isAvailable; }
+    // Getters
+    string getRoomNo() const { return roomNo; }
+    string getRoomType() const { return roomType; }
+    double getRoomPrice() const { return price; }
+    bool getRoomAvailability() const { return isAvailable; }
+
+    // Setters
+    void setRoomNo(const string &no) { roomNo = no; }
+    void setRoomType(const string &type) { roomType = type; }
+    void setRoomPrice(double p) { price = p; }
     void setRoomAvailability(bool available) { isAvailable = available; }
+
+    // Display room details
+    virtual void displayRoomInfo() const {
+        cout << "[ID: " << roomNo << "] " << roomType << "\n"
+             << "- Price: Php " << price << "/night\n"
+             << "- Availability: " << (isAvailable ? "Available" : "Not Available") << endl;
+    }
+
+    virtual ~Room() {}
 };
+
+// Standard Room Class
+class StandardRoom : public Room {
+    string bedSize;
+
+public:
+    StandardRoom() : bedSize("Double") {}
+
+    // Getters and Setters
+    string getBedSize() const { return bedSize; }
+    void setBedSize(const string &size) { bedSize = size; }
+
+    // Display details
+    void displayRoomInfo() const override {
+        Room::displayRoomInfo();
+        cout << "- Bed Size: " << bedSize << "\n" << endl;
+    }
+};
+
+// Deluxe Room Class
+class DeluxeRoom : public Room {
+    string bedSize;
+    bool extraBedAvailable;
+
+public:
+    DeluxeRoom() : bedSize("Queen"), extraBedAvailable(false) {}
+
+    // Getters and Setters
+    string getBedSize() const { return bedSize; }
+    void setBedSize(const string &size) { bedSize = size; }
+
+    bool getExtraBedAvailable() const { return extraBedAvailable; }
+    void setExtraBedAvailable(bool available) { extraBedAvailable = available; }
+
+    // Display details
+    void displayRoomInfo() const override {
+        Room::displayRoomInfo();
+        cout << "- Bed Size: " << bedSize << "\n"
+             << "- Extra Bed Available: " << (extraBedAvailable ? "Yes" : "No") << "\n" << endl;
+    }
+};
+
+// Suite Room Class
+class SuiteRoom : public Room {
+    bool hasLivingRoom;
+    bool hasKitchen;
+    int noOfBedrooms;
+
+public:
+    SuiteRoom() : hasLivingRoom(true), hasKitchen(true), noOfBedrooms(2) {}
+
+    // Getters and Setters
+    bool getLivingRoom() const { return hasLivingRoom; }
+    void setLivingRoom(bool livingRoom) { hasLivingRoom = livingRoom; }
+
+    bool getKitchen() const { return hasKitchen; }
+    void setKitchen(bool kitchen) { hasKitchen = kitchen; }
+
+    int getNoOfBedrooms() const { return noOfBedrooms; }
+    void setNoOfBedrooms(int bedrooms) { noOfBedrooms = bedrooms; }
+
+    // Display details
+    void displayRoomInfo() const override {
+        Room::displayRoomInfo();
+        cout << "- Living Room: " << (hasLivingRoom ? "Yes" : "No") << "\n"
+             << "- Kitchen: " << (hasKitchen ? "Yes" : "No") << "\n"
+             << "- No. of Bedrooms: " << noOfBedrooms << "\n" << endl;
+    }
+};
+
+// Function to display all available rooms
+void displayAvailableRooms(const vector<Room *> &rooms) {
+    cout << "----------Park Inn Lodge Available Rooms----------\n" << endl;
+    for (const auto &room : rooms) {
+        room->displayRoomInfo();
+    }
+}
 
 // Base class: User
 class User {
@@ -123,24 +213,6 @@ public:
     void viewAnalytics() {
         cout << "Viewing analytics (placeholder).\n";
     }
-};
-
-// Derived class: StandardRoom
-class StandardRoom : public Room {
-public:
-    StandardRoom(int no, double p) : Room(no, "Standard", p) {}
-};
-
-// Derived class: DeluxeRoom
-class DeluxeRoom : public Room {
-public:
-    DeluxeRoom(int no, double p) : Room(no, "Deluxe", p) {}
-};
-
-// Derived class: SuiteRoom
-class SuiteRoom : public Room {
-public:
-    SuiteRoom(int no, double p) : Room(no, "Suite", p) {}
 };
 
 // ParkInnLodge class
