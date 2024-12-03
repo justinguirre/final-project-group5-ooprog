@@ -160,7 +160,7 @@ public:
         for (auto &room : rooms) {
             if (room->getRoomAvailability()) {
                 cout << "- Room " << room->getRoomNo() << " (" << room->getRoomType()
-                     << ") - $" << room->getRoomPrice() << endl;
+                     << ") - P" << room->getRoomPrice() << endl;
             }
         }
     }
