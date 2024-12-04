@@ -714,11 +714,12 @@ void display() {
     vector<Room*> rooms;
     bool running = true;
 
+    // Sample users (consider removing hardcoded values later)
     users.push_back(new Employee("Employee Park Inn Lodge", "admin@example.com", "pil123"));
     users.push_back(new Customer("John Doe", "john@example.com", "pil456"));
 
     while (running) {
-        cout << "Hotel Management System\n";
+        cout << "\nHotel Management System\n";
         cout << "1. Guest Login\n";
         cout << "2. Employee Login\n";
         cout << "3. Register as Customer\n";
@@ -726,38 +727,30 @@ void display() {
         cout << "Choose an option: ";
         int choice;
         cin >> choice;
-        // Check if input is valid
-        if (!cin) {  // Check if the input is in a bad state (non-integer input)
-            cin.clear();  // Clear the error flag
-            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
-            cout << "Error: invalid input" << endl;
-            continue;  // Skip to the next iteration of the loop
-        }
-        if (!intIsValid(choice)) {
-            cout << "Error: invalid input" << endl;
+
+        // Input validation
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "Error: Invalid input. Please enter a number.\n";
             continue;
         }
 
         switch (choice) {
             case 1: { // Guest Login
                 string email, password;
+                cin.ignore(); // Clear leftover newline
                 cout << "Enter Email: ";
                 getline(cin, email);
-                email = toUpper(email);
-                cin.clear();
-                cin.ignore();
                 cout << "Enter Password: ";
                 getline(cin, password);
-                cin.clear();
-                cin.ignore();
 
                 User* loggedInUser = User::login(users, email, password);
-                if (loggedInUser && loggedInUser->getRole() == "Customer") {  // Using the getter
+                if (loggedInUser && loggedInUser->getRole() == "Customer") {
                     Customer* customer = static_cast<Customer*>(loggedInUser);
                     bool guestMenu = true;
-
                     while (guestMenu) {
-                        cout << "\n========== Hotel Management System - Guest Menu ==========\n";
+                        cout << "\n========== Guest Menu ==========\n";
                         cout << "1. View Room Available\n";
                         cout << "2. Book Room\n";
                         cout << "3. Edit Booking\n";
@@ -768,12 +761,12 @@ void display() {
                         cout << "Choose an option: ";
                         int guestOption;
                         cin >> guestOption;
-                        // Check if input is valid
-                        if (!cin) {  // Check if the input is in a bad state (non-integer input)
-                            cin.clear();  // Clear the error flag
-                            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
-                            cout << "Error: invalid input" << endl;
-                            continue;  // Skip to the next iteration of the loop
+
+                        if (cin.fail()) {
+                            cin.clear();
+                            cin.ignore(10000, '\n');
+                            cout << "Error: Invalid input.\n";
+                            continue;
                         }
                         if (!intIsValid(guestOption)) {
                             cout << "Error: invalid input" << endl;
@@ -797,7 +790,7 @@ void display() {
 
                                 do {
                                     cout << "Enter the Room ID you want to book: ";
-                                    getline(cin, roomNo);
+                                    cin >> roomNo;
                                 if (roomNo.empty()) {
                                     cout << "Room ID cannot be empty. Please enter a valid Room ID.\n";
                                     }
@@ -814,7 +807,7 @@ void display() {
 
                                 do {
                                     cout << "Enter Check-in Date (YYYY-MM-DD): ";
-                                    getline(cin, fromDate);
+                                    cin >> fromDate;
                                 if (!isValidDate(fromDate)) {
                                     cout << "Invalid date format. Please use YYYY-MM-DD.\n";
                                     }
@@ -832,17 +825,6 @@ void display() {
                                 do {
                                     cout << "Enter the Number of Guests (maximum 10): ";
                                     cin >> guests;
-                                    // Check if input is valid
-                                    if (!cin) {  // Check if the input is in a bad state (non-integer input)
-                                        cin.clear();  // Clear the error flag
-                                        cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
-                                        cout << "Error: invalid input" << endl;
-                                        continue;  // Skip to the next iteration of the loop
-                                    }
-                                    if (!intIsValid(guests)) {
-                                        cout << "Error: invalid input" << endl;
-                                        continue;
-                                    }
                                     if (guests <= 0 || guests > 10) {
                                         cout << "Invalid number of guests. Please enter a value between 1 and 10.\n";
                                     }
@@ -853,17 +835,6 @@ void display() {
                                 do {
                                     cout << "Choose Payment Method (1: Cash, 2: Gcash, 3: Card): ";
                                     cin >> paymentChoice;
-                                    // Check if input is valid
-                                    if (!cin) {  // Check if the input is in a bad state (non-integer input)
-                                        cin.clear();  // Clear the error flag
-                                        cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
-                                        cout << "Error: invalid input" << endl;
-                                        continue;  // Skip to the next iteration of the loop
-                                    }
-                                    if (!intIsValid(paymentChoice)) {
-                                        cout << "Error: invalid input" << endl;
-                                        continue;
-                                    }
                                     if (paymentChoice < 1 || paymentChoice > 3) {
                                         cout << "Invalid payment choice. Please select 1, 2, or 3.\n";
                                     }
@@ -885,17 +856,6 @@ void display() {
                                         do {
                                          cout << "Select Card Type (1: Credit, 2: Debit): ";
                                          cin >> cardTypeChoice;
-                                         // Check if input is valid
-                                        if (!cin) {  // Check if the input is in a bad state (non-integer input)
-                                            cin.clear();  // Clear the error flag
-                                            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
-                                            cout << "Error: invalid input" << endl;
-                                            continue;  // Skip to the next iteration of the loop
-                                        }
-                                        if (!intIsValid(cardTypeChoice)) {
-                                            cout << "Error: invalid input" << endl;
-                                            continue;
-                                        }
                                         if (cardTypeChoice == 1) {
                                          isCredit = true;
                                          paymentMethod = "Credit Card";
@@ -910,13 +870,6 @@ void display() {
                                         do {
                                             cout << "Enter Card Number (16 digits): ";
                                             cin >> cardNumber;
-                                            // Check if input is valid
-                                            if (!cin) {  // Check if the input is in a bad state (non-integer input)
-                                                cin.clear();  // Clear the error flag
-                                                cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
-                                                cout << "Error: invalid input" << endl;
-                                                continue;  // Skip to the next iteration of the loop
-                                            }
                                             if (cardNumber.length() != 16 || !all_of(cardNumber.begin(), cardNumber.end(), ::isdigit)) {
                                                 cout << "Invalid card number. It must be exactly 16 digits.\n";
                                             }
@@ -926,13 +879,6 @@ void display() {
                                         do {
                                             cout << "Enter Expiration Date (MM/YY): ";
                                             cin >> expiration;
-                                            // Check if input is valid
-                                            if (!cin) {  // Check if the input is in a bad state (non-integer input)
-                                                cin.clear();  // Clear the error flag
-                                                cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
-                                                cout << "Error: invalid input" << endl;
-                                                continue;  // Skip to the next iteration of the loop
-                                            }
 
                                             regex expPattern("^\\d{2}/\\d{2}$");
                                             if (!regex_match(expiration, expPattern)) {
@@ -964,13 +910,6 @@ void display() {
                                         do {
                                             cout << "Enter Card PIN (4 digits): ";
                                             cin >> pin;
-                                            // Check if input is valid
-                                            if (!cin) {  // Check if the input is in a bad state (non-integer input)
-                                                cin.clear();  // Clear the error flag
-                                                cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
-                                                cout << "Error: invalid input" << endl;
-                                                continue;  // Skip to the next iteration of the loop
-                                            }
                                             if (pin.length() != 4 || !all_of(pin.begin(), pin.end(), ::isdigit)) {
                                                 cout << "Invalid PIN. It must be exactly 4 digits.\n";
                                             }
@@ -988,18 +927,18 @@ void display() {
                             }
                             case 3: { // Edit Booking
                                 string bookingID;
-                                cout << "----------Park Inn Lodge Edit Booking----------\n";
+                                cout << "\n---------- Park Inn Lodge Edit Booking ----------\n";
                                 cout << "Enter Booking ID to edit: ";
-                                getline(cin, bookingID);
-                                bookingID = toUpper(bookingID);
-                                cin.clear();
-                                cin.ignore();
-                                // Add logic to edit booking details here.
+                                cin.ignore(); // Clear the leftover newline from previous input
+                                getline(cin, bookingID); // Use getline for IDs
+                                bookingID = toUpper(bookingID); // Convert to uppercase if needed
+
+                                customer->editBooking(bookingID); // Call the function on the customer object
                                 break;
                             }
                             case 4: { // Cancel Booking
                                 string bookingID;
-                                cout << "----------Park Inn Lodge Cancel Booking----------\n";
+                                cout << "\n----------Park Inn Lodge Cancel Booking----------\n";
                                 cout << "Enter Booking ID to cancel: ";
                                 getline(cin, bookingID);
                                 bookingID = toUpper(bookingID);
@@ -1009,7 +948,7 @@ void display() {
                                 break;
                             }
                             case 5: { // View Booking and Payment History
-                                cout << "----------Park Inn Lodge Booking History----------\n";
+                                cout << "\n----------Park Inn Lodge Booking History----------\n";
                                 customer->viewBookingHistory();
                                 break;
                             }
@@ -1050,11 +989,9 @@ void display() {
             }
             case 2: { // Employee Login
                 string email, password;
+                cin.ignore();
                 cout << "Enter Email: ";
                 getline(cin, email);
-                email = toUpper(email);
-                cin.clear();
-                cin.ignore();
                 cout << "Enter Password: ";
                 getline(cin, password);
 
@@ -1063,21 +1000,22 @@ void display() {
                     Employee* admin = dynamic_cast<Employee*>(loggedInEmployee);
                     bool adminMenuActive = true;
                     while (adminMenuActive) {
+                        cout << "\n========== Admin Menu ==========\n";
                         cout << "1. Add Room\n";
                         cout << "2. Delete Room\n";
                         cout << "3. View Available Rooms\n";
-                        cout << "4. View Check-Ins and Check-Outs\n";
-                        cout << "5. Generate Report\n";
+                        cout << "4. View Check In and Check Out\n";
+                        cout << "5. Generate Report";
                         cout << "6. Logout\n";
                         cout << "Enter your choice: ";
                         int adminChoice;
                         cin >> adminChoice;
-                        // Check if input is valid
-                        if (!cin) {  // Check if the input is in a bad state (non-integer input)
-                            cin.clear();  // Clear the error flag
-                            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
-                            cout << "Error: invalid input" << endl;
-                            continue;  // Skip to the next iteration of the loop
+
+                        if (cin.fail()) {
+                            cin.clear();
+                            cin.ignore(10000, '\n');
+                            cout << "Error: Invalid input.\n";
+                            continue;
                         }
                         if (!intIsValid(adminChoice)) {
                             cout << "Error: invalid input" << endl;
@@ -1135,23 +1073,15 @@ void display() {
             }
             case 3: { // Register as Customer
                 string name, email, password;
+                cin.ignore();
                 cout << "Enter your Name: ";
                 getline(cin, name);
-                name = toUpper(name);
-                cin.clear();
-                cin.ignore();
                 cout << "Enter your Email: ";
                 getline(cin, email);
-                name = toUpper(email);
-                cin.clear();
-                cin.ignore();
                 cout << "Enter your Password: ";
                 getline(cin, password);
-                cin.clear();
-                cin.ignore();
 
                 User* newCustomer = new Customer(name, email, password);
-                newCustomer->createAccount();
                 users.push_back(newCustomer);
                 cout << "Customer account created successfully!\n";
                 break;
@@ -1167,5 +1097,38 @@ void display() {
 
 int main() {
     display();
+    
+    /*
+    Dear Queen Beyoncé,
 
+    We hope this message finds you well. 
+    We’re writing to express our heartfelt gratitude for everything you represent 
+    and the immense impact your music has had on our lives, especially during our journey 
+    through Object-Oriented Programming. 
+
+    As a group that faced countless late nights and moments of doubt while tackling complex concepts, 
+    we found incredible solace and inspiration in your music. 
+    Your songs, from “Run the World (Girls)” to “Halo,” became our soundtrack during every coding session, 
+    reminding us that perseverance, strength, and belief in ourselves were key to overcoming challenges. 
+
+    There were times when the coding seemed too difficult, and we felt like giving up, 
+    but your powerful anthems fueled us to keep going, to dig deeper, and to never stop until we got it right. 
+    In those moments, we thought of how you’ve always pushed boundaries in your own career, 
+    and it gave us the courage to push through our struggles and keep moving forward.
+
+    Your music has always been a source of empowerment, but in this particular moment, 
+    it became more than just songs—-it became the very energy that carried us through to success. 
+    The confidence and resilience you exude, both on and off the stage, are qualities we aspire to embody in our own lives. 
+    In every note, every lyric, you remind us that there is no obstacle too great when we commit ourselves wholeheartedly. 
+
+    Thanks to your influence, we were able to tackle one of the most challenging subjects we’ve faced 
+    and come out successful on the other side. Passing our finals in Object-Oriented Programming 
+    is a victory we share with you, as your artistry helped us stay focused, determined, and relentless. 
+
+    Thank you for being not just a global icon but a beacon of light and strength for so many, 
+    including us. Your legacy continues to inspire and motivate us in ways words can hardly capture.
+
+    With all our love and deepest appreciation,  
+    C2B - Group 5 <3
+    */
 }
