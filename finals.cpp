@@ -8,19 +8,36 @@
 #include <regex>
 using namespace std;
 
+// * TO-DO:
+// * - = not done
+// * = = in progress
+// * + = finished
+// * ~ = failed/canceled
+
+// - edit booking (nothing happens after entering booking id)
+// ~ edit account (nothing happens after typing 6)
+// - delete account (not working properly)
+// - view checkins (not implemented yet)
+// + checkin/out (not implemented yet)
+// - generate report (not implemented yet)
+
 bool intIsValid(int input) {
-    bool isIntValid = true;
+    bool valid = true;
     string inputString = to_string(input);
     if (input <= 0) {
-        isIntValid = false;
+        valid = false;
     }
     for (char c: inputString) {
         if (!isdigit(c)) {
-            isIntValid = false;
+            valid = false;
             break;
         }
     }
-    return isIntValid;
+    
+    if (inputString.empty()) {
+        valid = false;
+    }
+    return valid;
 }
 
 bool doubleIsValid(double input) {
@@ -279,21 +296,21 @@ public:
         double price;
 
         cout << "Enter Room Number: ";
-        getline(cin, roomNo);
+        getline(cin >> ws, roomNo);
         roomNo = toUpper(roomNo);
         cin.clear();
         cin.ignore();
         cout << "Enter Room Type: ";
-        getline(cin, roomType);
+        getline(cin >> ws, roomType);
         roomType = toUpper(roomType);
         cin.clear();
         cin.ignore();
         cout << "Enter Features: ";
-        getline(cin, features);
+        getline(cin >> ws, features);
         cin.clear();
         cin.ignore();
         cout << "Enter Price: ";
-        (cin, price);
+        (cin >> ws, price);
         cin.clear();
         cin.ignore();
 
@@ -318,7 +335,7 @@ public:
         string roomNo;
 
         cout << "Enter Room Number to delete: ";
-        getline(cin, roomNo);
+        getline(cin >> ws, roomNo);
         roomNo = toUpper(roomNo);
         cin.clear();
         cin.ignore();
@@ -378,7 +395,7 @@ public:
     bool deleteAccount(vector<User*>& users) {
     string passEntered;
     cout << "Confirm password to delete account: ";
-    getline(cin, passEntered);
+    getline(cin >> ws, passEntered);
     cin.clear();
     cin.ignore();
 
@@ -652,16 +669,25 @@ void display() {
     users.push_back(new Customer("John Doe", "john@example.com", "pil456"));
 
     while (running) {
-        cout << "\nHotel Management System\n";
+        cout << "Hotel Management System\n";
         cout << "1. Guest Login\n";
         cout << "2. Employee Login\n";
         cout << "3. Register as Customer\n";
         cout << "4. Exit\n";
         cout << "Choose an option: ";
         int choice;
-        (cin, choice);
-        cin.clear();
-        cin.ignore();
+        cin >> choice;
+        // Check if input is valid
+        if (!cin) {  // Check if the input is in a bad state (non-integer input)
+            cin.clear();  // Clear the error flag
+            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+            cout << "Error: invalid input" << endl;
+            continue;  // Skip to the next iteration of the loop
+        }
+        if (!intIsValid(choice)) {
+            cout << "Error: invalid input" << endl;
+            continue;
+        }
 
         switch (choice) {
             case 1: { // Guest Login
@@ -692,9 +718,18 @@ void display() {
                         cout << "7. Logout\n";
                         cout << "Choose an option: ";
                         int guestOption;
-                        (cin, guestOption);
-                        cin.clear();
-                        cin.ignore();
+                        cin >> guestOption;
+                        // Check if input is valid
+                        if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                            cin.clear();  // Clear the error flag
+                            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                            cout << "Error: invalid input" << endl;
+                            continue;  // Skip to the next iteration of the loop
+                        }
+                        if (!intIsValid(guestOption)) {
+                            cout << "Error: invalid input" << endl;
+                            continue;
+                        }
 
                         switch (guestOption) {
                             case 1: { // View Available Rooms
@@ -933,9 +968,18 @@ void display() {
                         cout << "6. Logout\n";
                         cout << "Enter your choice: ";
                         int adminChoice;
-                        (cin, adminChoice);
-                        cin.clear();
-                        cin.ignore();
+                        cin >> adminChoice;
+                        // Check if input is valid
+                        if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                            cin.clear();  // Clear the error flag
+                            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                            cout << "Error: invalid input" << endl;
+                            continue;  // Skip to the next iteration of the loop
+                        }
+                        if (!intIsValid(adminChoice)) {
+                            cout << "Error: invalid input" << endl;
+                            continue;
+                        }
                         switch (adminChoice) {
                             case 1: {
                                 cout << "----------Park Inn Lodge Adding Rooms----------\n";
@@ -1019,7 +1063,6 @@ void display() {
 }
 
 int main() {
-     cout << "\nGroup 5 - Casanova, Cruzat, Gonzales, Guirre\n";
     display();
 
 }
