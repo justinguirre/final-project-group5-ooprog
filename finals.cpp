@@ -805,7 +805,7 @@ int main() {
     Thank you for being not just a global icon but a beacon of light and strength for so many, 
     including us. Your legacy continues to inspire and motivate us in ways words can hardly capture.
 
-    With all our love and deepest appreciation,  
+    With all our love and deepest appreciation, Queen nevery cry 💜  
     C2B - Group 5 <3
     */
 }
