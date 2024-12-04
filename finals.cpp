@@ -1,7 +1,9 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <string>
 #include <limits>
+#include <algorithm>
 using namespace std;
 
 // * TO-DO:
@@ -35,7 +37,7 @@ public:
     double getRoomPrice() const { return price; }
     bool getRoomAvailability() const { return isAvailable; }
     string getRoomFeatures() const { return features; }
-    string getBookingId() const ( return bookingId; )
+    string getBookingId() const { return bookingId; }
 
     void setRoomNo(const string &no) { this->roomNo = no; }
     void setRoomType(const string &type) { this->roomType = type; }
@@ -43,7 +45,7 @@ public:
     void setRoomAvailability(bool available) { isAvailable = available; }
     void setBookingId(string bookingid) { this->bookingId = bookingid; } 
 
-    virtual void displayRoomInfo() const {
+    virtual void displayRoomInfo() {
         cout << "[ID: " << roomNo << "] " << roomType << "\n"
              << "- Price: Php " << price << "/night\n"
              << "- Features: " << features << "\n"
@@ -65,7 +67,7 @@ public:
     string getBedSize() const { return bedSize; }
     void setBedSize(const string &size) { bedSize = size; }
 
-    void displayRoomInfo() const override {
+    void displayRoomInfo() override {
         Room::displayRoomInfo(); // ;)
         cout << "- Bed Size: " << bedSize << "\n" << endl;
     }
@@ -86,8 +88,11 @@ public:
     bool getExtraBedAvailable() const { return extraBedAvailable; }
     void setExtraBedAvailable(bool available) { extraBedAvailable = available; }
 
-    void displayRoomInfo() const override {
-        Room::displayRoomInfo();
+    void displayRoomInfo() override {
+        cout << "[ID: " << roomNo << "] " << roomType << "\n"
+             << "- Price: Php " << price << "/night\n"
+             << "- Features: " << features << "\n"
+             << "- Availability: " << (isAvailable ? "Available" : "Not Available") << endl;
         cout << "- Bed Size: " << bedSize << "\n"
              << "- Extra Bed Available: " << (extraBedAvailable ? "Yes" : "No") << "\n" << endl;
     }
@@ -112,8 +117,11 @@ public:
     int getNoOfBedrooms() const { return noOfBedrooms; }
     void setNoOfBedrooms(int bedrooms) { noOfBedrooms = bedrooms; }
 
-    void displayRoomInfo() const override {
-        Room::displayRoomInfo();
+    void displayRoomInfo() override {
+        cout << "[ID: " << roomNo << "] " << roomType << "\n"
+             << "- Price: Php " << price << "/night\n"
+             << "- Features: " << features << "\n"
+             << "- Availability: " << (isAvailable ? "Available" : "Not Available") << endl;
         cout << "- Living Room: " << (hasLivingRoom ? "Yes" : "No") << "\n"
              << "- Kitchen: " << (hasKitchen ? "Yes" : "No") << "\n"
              << "- No. of Bedrooms: " << noOfBedrooms << "\n" << endl;
@@ -127,14 +135,15 @@ private:
     string roomNo;
     string fromDate;
     string toDate;
-    PaymentMethod paymentMethod;
+    string paymentMethod;
     double totalPrice;
     bool hasCheckedIn;
     bool hasCheckedOut;
+    int guests;
 
 public:
-    Booking(string id, string room, string from, string to, int guests, PaymentMethod& payment, double price) 
-        : bookingID(id), roomNo(room), fromDate(from), toDate(to), paymentMethod(payment), totalPrice(price), hasCheckedIn(false) {}
+    Booking(string id, string room, string from, string to, int guests, string payment, double price) 
+        : bookingID(id), roomNo(room), fromDate(from), toDate(to), guests(guests), paymentMethod(payment), totalPrice(price), hasCheckedIn(false) {}
 
     void displayBookingDetails() const {
         cout << setprecision(2) << fixed << "Booking ID: " << bookingID << endl
@@ -157,128 +166,6 @@ public:
 
     void setHasCheckedOut(bool val) {
         this->hasCheckedOut = val;
-    }
-};
-
-class PaymentMethod {
-public:
-    virtual bool processPayment(double amount) = 0;
-    virtual string getType() const = 0;
-    virtual ~PaymentMethod() {}
-};
-
-class Card : public PaymentMethod {
-private:
-    string number;
-    string expiration;
-    string pin;
-    bool isCredit;
-
-public:
-    Card(const string& number, const string& expiration, const string& pin, bool isCredit)
-        : number(number), expiration(expiration), pin(pin), isCredit(isCredit) {}
-
-    bool processPayment(double amount) override {
-        // Simple validation
-        if (number.empty() || expiration.empty() || pin.empty()) {
-            cout << "Invalid card details. Payment failed.\n";
-            return false;
-        }
-
-        // Simulate PIN verification
-        string inputPin;
-        cout << "Enter " << (isCredit ? "Credit" : "Debit") << " Card PIN: ";
-        cin >> inputPin;
-
-        if (inputPin != pin) {
-            cout << "Incorrect PIN. Payment declined.\n";
-            return false;
-        }
-
-        // Simulate payment processing
-        cout << "Processing " << (isCredit ? "credit" : "debit") 
-             << " card payment of Php " << amount << endl;
-        
-        // Simulate transaction confirmation
-        char confirm;
-        cout << "Confirm payment? (Y/N): ";
-        cin >> confirm;
-
-        if (confirm == 'Y' || confirm == 'y') {
-            cout << "Payment successful!\n";
-            return true;
-        } else {
-            cout << "Payment cancelled.\n";
-            return false;
-        }
-    }
-
-    string getType() const override {
-        return isCredit ? "Credit Card" : "Debit Card";
-    }
-};
-
-class GCash : public PaymentMethod {
-private:
-    string number;
-    double balance;
-
-public:
-    GCash(const string& number, double initialBalance = 10000.0) 
-        : number(number), balance(initialBalance) {}
-
-    bool processPayment(double amount) override {
-        // Validate phone number
-        if (number.empty() || number.length() != 11) {
-            cout << "Invalid GCash number. Payment failed.\n";
-            return false;
-        }
-
-        // Check balance
-        if (amount > balance) {
-            cout << "Insufficient balance. Payment failed.\n";
-            return false;
-        }
-
-        // Simulate OTP verification
-        string otp;
-        cout << "Enter GCash OTP: ";
-        cin >> otp;
-
-        // Simple OTP validation (just for demonstration)
-        if (otp != "123456") {
-            cout << "Incorrect OTP. Payment declined.\n";
-            return false;
-        }
-
-        // Process payment
-        balance -= amount;
-        cout << "Processing GCash payment of Php" << amount << endl;
-        
-        // Confirm transaction
-        char confirm;
-        cout << "Confirm payment? (Y/N): ";
-        cin >> confirm;
-
-        if (confirm == 'Y' || confirm == 'y') {
-            cout << "Payment successful!\n";
-            cout << "Remaining balance: Php" << balance << endl;
-            return true;
-        } else {
-            // Refund the amount if cancelled
-            balance += amount;
-            cout << "Payment cancelled.\n";
-            return false;
-        }
-    }
-
-    string getType() const override {
-        return "GCash";
-    }
-
-    // Getter for balance (optional, but useful)
-    double getBalance() const {
-        return balance;
     }
 };
 
@@ -339,11 +226,11 @@ public:
 
         Room* newRoom = nullptr;
 
-        if (roomType == "Standard") {
+        if (roomType == "STANDARD") {
             newRoom = new StandardRoom(roomNo, price, features);
-        } else if (roomType == "Deluxe") {
+        } else if (roomType == "DELUXE") {
             newRoom = new DeluxeRoom(roomNo, price, features);
-        } else if (roomType == "Suite") {
+        } else if (roomType == "SUITE") {
             newRoom = new SuiteRoom(roomNo, price, features);
         } else {
             cout << "Invalid room type.\n";
@@ -394,7 +281,7 @@ class Customer : public User {
     vector<Booking*> bookings;
     vector<string> paymentHistory;
     vector<int> currentBookings;
-    vector<PaymentMethod> paymentMethods;
+    vector<string> paymentMethods;
 
 public:
     Customer(string n, string e, string p) : User(n, e, p, "Customer") {}
@@ -427,7 +314,7 @@ public:
         cout << "Booking ID not found.\n";
     }
 
-    void addPaymentMethod(PaymentMethod& paymentMethod) {
+    void addPaymentMethod(string paymentMethod) {
         paymentMethods.push_back(paymentMethod);
     }
 
@@ -449,7 +336,7 @@ class ParkInnLodge {
         void createAccount(Customer& customer) {
             bool found = false;
             for (auto& cust : users) {
-                if (customer.getEmail() == cust.getEmail()) {
+                if (customer.getEmail() == cust->getEmail()) {
                     cout << "Email already exists!" << endl;
                     found = true;
                     break;
@@ -457,7 +344,7 @@ class ParkInnLodge {
             }
 
             if (!found) {
-                users.push_back(customer);
+                users.push_back(&customer);
                 cout << "Account created for " << customer.getName() << endl;
             }
         }
@@ -465,7 +352,7 @@ class ParkInnLodge {
         void addRoom(Room& room) {
             bool found = false;
             for (auto& rewm : rooms) {
-                if (room.getRoomNo == rewm.getRoomNo()) {
+                if (room.getRoomNo() == rewm->getRoomNo()) {
                     cout << "Room number already exists!" << endl;
                     found = true;
                     break;
@@ -473,7 +360,7 @@ class ParkInnLodge {
             }
 
             if (!found) {
-                rooms.push_back(room);
+                rooms.push_back(&room);
                 cout << "Room " << room.getRoomNo() << " created";
             }
         }
@@ -482,7 +369,7 @@ class ParkInnLodge {
             if (toEdit == "ROOMNO") {
                 bool found = false;
                 for (auto& rewm : rooms) {
-                    if (newValue == rewm.getRoomNo()) {
+                    if (newValue == rewm->getRoomNo()) {
                         cout << "Room number already exists!" << endl;
                         found = true;
                         break;
@@ -504,10 +391,10 @@ class ParkInnLodge {
             }
         }
 
-        void deleteRoom(Room& room) {
+        void deleteRoom(Room& roomToDelete) {
             auto it = remove_if(rooms.begin(), rooms.end(),
-                [&roomToDelete](const Room& room) {
-                    return room.getRoomNo() == roomToDelete.getRoomNo();  // Compare by room number
+                [&roomToDelete](Room* room) {
+                    return room->getRoomNo() == roomToDelete.getRoomNo();  // Compare by room number
                 });
 
             // Check if the room was found and removed
@@ -519,8 +406,8 @@ class ParkInnLodge {
             }
         }
 
-        void bookRoom(const Booking& booking) {
-            bookings.push_back(booking);
+        void bookRoom(Booking& booking) {
+            bookings.push_back(&booking);
             cout << "Booking success!" << endl;
         }
 
@@ -530,8 +417,8 @@ class ParkInnLodge {
                 return;
             }
             for (const auto& room : rooms) {
-                if (room.getRoomAvailability()) {
-                    room.displayRoomInfo();
+                if (room->getRoomAvailability()) {
+                    room->displayRoomInfo();
                 }
             }
         }
@@ -560,7 +447,7 @@ class ParkInnLodge {
             }
         }
 
-}
+};
 
 void display() {
     vector<User*> users;
@@ -569,6 +456,7 @@ void display() {
 
     // Create sample users
     users.push_back(new Employee("Employee Park Inn Lodge", "admin@example.com", "pil123"));
+    users.push_back(new Customer("John Doe", "john@example.com", "pil456"));
 
     while (running) {
         cout << "Hotel Management System\n";
@@ -600,9 +488,8 @@ void display() {
                         cout << "3. Edit Booking\n";
                         cout << "4. Cancel Booking\n";
                         cout << "5. View Booking and Payment History\n";
-                        cout << "6. Edit Account\n";
-                        cout << "7. Delete Account\n";
-                        cout << "8. Logout\n";
+                        cout << "6. Delete Account\n";
+                        cout << "7. Logout\n";
                         cout << "Choose an option: ";
                         int guestOption;
                         cin >> guestOption;
@@ -634,9 +521,15 @@ void display() {
                                 int paymentChoice;
                                 cin >> paymentChoice;
                                 switch (paymentChoice) {
-                                    case 1: paymentMethod = "Cash"; break;
-                                    case 2: paymentMethod = "Digital Wallet"; break;
-                                    case 3: paymentMethod = "Credit/Debit Card"; break;
+                                    case 1:
+                                        paymentMethod = "Cash";
+                                        break;
+                                    case 2: 
+                                        paymentMethod = "Digital Wallet";
+                                        break;
+                                    case 3:
+                                        paymentMethod = "Credit/Debit Card";
+                                        break;
                                 }
                                 double price = 2000; // Example room price, adjust based on room
                                 customer->bookRoom(roomNo, fromDate, toDate, guests, paymentMethod, price);
@@ -663,16 +556,21 @@ void display() {
                                 customer->viewBookingHistory();
                                 break;
                             }
-                            case 6: { // Edit Account
-                                // Logic to edit account details (email, password)
+                            case 6: { // Delete Account
+                                string passEntered;
+                                cout << "Enter password to delete account: ";
+                                cin >> passEntered
+                                
+                                if (customer->getPassword() == passEntered) {
+                                    customer->deleteAccount();
+                                    cout << "Account deleted." << endl;
+                                    guestMenu = false;
+                                } else {
+                                    cout << "Cannot delete account: incorrect password" << endl;
+                                }
                                 break;
                             }
-                            case 7: { // Delete Account
-                                customer->deleteAccount();
-                                guestMenu = false;
-                                break;
-                            }
-                            case 8: { // Logout
+                            case 7: { // Logout
                                 guestMenu = false;
                                 break;
                             }
@@ -805,7 +703,7 @@ int main() {
     Thank you for being not just a global icon but a beacon of light and strength for so many, 
     including us. Your legacy continues to inspire and motivate us in ways words can hardly capture.
 
-    With all our love and deepest appreciation, Queen nevery cry 💜  
+    With all our love and deepest appreciation,  
     C2B - Group 5 <3
     */
 }
