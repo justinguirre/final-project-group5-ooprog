@@ -8,19 +8,6 @@
 #include <regex>
 using namespace std;
 
-// * TO-DO:
-// * - = not done
-// * = = in progress
-// * + = finished
-// * ~ = failed/canceled
-
-// - edit booking (nothing happens after entering booking id)
-// ~ edit account (nothing happens after typing 6)
-// + delete account (not working properly)
-// - view checkins (not implemented yet)
-// + checkin/out (not implemented yet)
-// - generate report (not implemented yet)
-
 bool intIsValid(int input) {
     bool isIntValid = true;
     string inputString = to_string(input);
