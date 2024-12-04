@@ -176,15 +176,15 @@ protected:
 public:
     User(string n, string e, string p, string r) : name(n), email(e), password(p), role(r) {}
     string getName() { return name; }
-    string getEmail() { return email; }
+    string getEmail() const { return email; }
     string getPassword() { return password; }
     string getRole() { return role; }
+    
 
     // Getter for role
     string getRole() const { return role; }
 
     virtual void createAccount() = 0;
-    virtual void deleteAccount() = 0;
 
     static User* login(vector<User*>& users, string email, string password) {
         for (auto& user : users) {
@@ -206,7 +206,7 @@ public:
         cout << "Employee account created for: " << name << endl;
     }
 
-    void deleteAccount() override {
+    void deleteAccount() {
         cout << "Employee account deleted for: " << name << endl;
     }
 
@@ -290,9 +290,27 @@ public:
         cout << "Customer account created for: " << name << endl;
     }
 
-    void deleteAccount() override {
-        cout << "Customer account deleted for: " << name << endl;
+    bool deleteAccount(vector<User*>& users) {
+    string passEntered;
+    cout << "Confirm password to delete account: ";
+    cin >> passEntered;
+
+    if (passEntered == password) {
+        auto it = std::find_if(users.begin(), users.end(),
+                              [this](const User* user) { return user->getEmail() == email; });
+        if (it != users.end()) {
+            users.erase(it);
+            cout << "Customer account deleted for: " << name << endl;
+            return true;
+        } else {
+            cout << "Cannot delete account: incorrect password" << endl;
+            return false;
+        }
+    } else {
+        cout << "Cannot delete account: incorrect password" << endl;
+        return false;
     }
+}
 
     void bookRoom(string roomNo, string fromDate, string toDate, int guests, string paymentMethod, double price) {
         string bookingID = "B" + to_string(bookings.size() + 1); // Example of generating a booking ID
@@ -511,28 +529,39 @@ void display() {
 
                                 cout << "Enter the Room ID you want to book: ";
                                 cin >> roomNo;
-                                cout << "Enter Check-in Date (YYYY-MM-DD): ";
-                                cin >> fromDate;
-                                cout << "Enter Check-out Date (YYYY-MM-DD): ";
-                                cin >> toDate;
-                                cout << "Enter the Number of Guests: ";
-                                cin >> guests;
-                                cout << "Choose Payment Method (1: Cash, 2: Digital Wallet, 3: Credit/Debit Card): ";
-                                int paymentChoice;
-                                cin >> paymentChoice;
-                                switch (paymentChoice) {
-                                    case 1:
-                                        paymentMethod = "Cash";
-                                        break;
-                                    case 2: 
-                                        paymentMethod = "Digital Wallet";
-                                        break;
-                                    case 3:
-                                        paymentMethod = "Credit/Debit Card";
-                                        break;
+                                bool found = false;
+                                for (auto& rewm : rooms) {
+                                    if (roomNo == rewm->getRoomNo()) {
+                                        found = true;
+                                    }
                                 }
-                                double price = 2000; // Example room price, adjust based on room
-                                customer->bookRoom(roomNo, fromDate, toDate, guests, paymentMethod, price);
+                    
+                                if (found) {
+                                    cout << "Enter Check-in Date (YYYY-MM-DD): ";
+                                    cin >> fromDate;
+                                    cout << "Enter Check-out Date (YYYY-MM-DD): ";
+                                    cin >> toDate;
+                                    cout << "Enter the Number of Guests: ";
+                                    cin >> guests;
+                                    cout << "Choose Payment Method (1: Cash, 2: Digital Wallet, 3: Credit/Debit Card): ";
+                                    int paymentChoice;
+                                    cin >> paymentChoice;
+                                    switch (paymentChoice) {
+                                        case 1:
+                                            paymentMethod = "Cash";
+                                            break;
+                                        case 2: 
+                                            paymentMethod = "Digital Wallet";
+                                            break;
+                                        case 3:
+                                            paymentMethod = "Credit/Debit Card";
+                                            break;
+                                    }
+                                    double price = 2000; // Example room price, adjust based on room
+                                    customer->bookRoom(roomNo, fromDate, toDate, guests, paymentMethod, price);
+                                } else {
+                                    cout << "Booking failed: room does not exist." << endl;
+                                }
                                 break;
                             }
                             case 3: { // Edit Booking
@@ -559,12 +588,13 @@ void display() {
                             case 6: { // Delete Account
                                 string passEntered;
                                 cout << "Enter password to delete account: ";
-                                cin >> passEntered
+                                cin >> passEntered;
                                 
                                 if (customer->getPassword() == passEntered) {
-                                    customer->deleteAccount();
-                                    cout << "Account deleted." << endl;
-                                    guestMenu = false;
+                                    if (customer->deleteAccount(users)) {
+                                        cout << "Account deleted." << endl;
+                                        guestMenu = false;
+                                    }
                                 } else {
                                     cout << "Cannot delete account: incorrect password" << endl;
                                 }
@@ -578,6 +608,8 @@ void display() {
                                 rooms.push_back(new DeluxeRoom("101", 5000.0));
                                 rooms.push_back(new StandardRoom("102", 3000.0));
                                 rooms.push_back(new SuiteRoom("201", 10000.0));
+                                cout << "thank you beyoncé 😭🙏" << endl;
+                                break;
                             }
                             default:
                                 cout << "Invalid option. Try again.\n";
@@ -614,8 +646,17 @@ void display() {
                                 break;
                             }
                             case 2: {
+                                string passEntered;
                                 cout << "----------Park Inn Lodge Deleting Rooms----------\n";
-                                admin->deleteRoom(rooms);
+                                cout << "Enter password to delete room: ";
+                                cin >> passEntered;
+                                
+                                if (admin->getPassword() == passEntered) {
+                                    admin->deleteRoom(rooms);
+                                    cout << "Deleted room." << endl;
+                                } else {
+                                    cout << "Cannot delete room: incorrect password" << endl;
+                                }
                                 break;
                             }
                             case 3: {
