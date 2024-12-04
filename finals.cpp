@@ -142,7 +142,7 @@ private:
     int guests;
 
 public:
-    Booking(string id, string room, string from, string to, int guests, string payment, double price) 
+    Booking(string id, string room, string from, string to, int guests, string payment, double price, string email) 
         : bookingID(id), roomNo(room), fromDate(from), toDate(to), guests(guests), paymentMethod(payment), totalPrice(price), hasCheckedIn(false) {}
 
     void displayBookingDetails() const {
@@ -159,7 +159,6 @@ public:
     string getPaymentMethod() const { return paymentMethod; }
     bool getHasCheckedIn() const { return hasCheckedIn; }
     bool getHasCheckedOut() const { return hasCheckedOut; }
-
     void setHasCheckedIn(bool val) {
         this->hasCheckedIn = val;
     }
@@ -179,6 +178,8 @@ public:
     string getEmail() const { return email; }
     string getPassword() { return password; }
     string getRole() { return role; }
+    
+    virtual void viewBookingHistory() = 0;
     
 
     // Getter for role
@@ -262,28 +263,36 @@ public:
     void viewCheckInOut() {
         cout << "Viewing all check-ins and check-outs (placeholder).\n";
     }
-
-    void generateReport() const {
-        cout << "----------[Hotel Name] Generate Report----------\n";
-        cout << "1. Daily Summary\n";
-        cout << "2. Weekly Summary\n";
-        cout << "3. Monthly Summary\n";
-        cout << "4. Custom Range\n";
-        cout << "Enter your choice: ";
-        int choice;
-        cin >> choice;
-
-        cout << "Viewing analytics (placeholder).\n";
+    
+    /*
+    void generateReport(const vector<Booking*>& bookings) const {
+      cout << "----------ParkInnLodge Report----------\n";
+      cout << "**Booking Details:**\n";
+      cout << "| Booking ID | Room No | Check-in | Check-out | Guests | Payment Method | Total Price |\n";
+      cout << "|---|---|---|---|---|---|---|\n";
+    
+      // Iterate through all bookings
+      for (const auto& booking : bookings) {
+        cout << "|" << setw(12) << booking->getBookingID() << " |";
+        cout << setw(9) << booking->getRoomNo() << " |";
+        cout << setw(10) << booking->getFromDate() << " |";
+        cout << setw(10) << booking->getToDate() << " |";
+        cout << setw(7) << booking->getGuests() << " |";
+        cout << setw(17) << booking->getPaymentMethod() << " |";
+        cout << setw(13) << fixed << setprecision(2) << booking->getTotalPrice() << " |\n";
+      }
     }
+    */
 };
 
 class Customer : public User {
-    vector<Booking*> bookings;
     vector<string> paymentHistory;
     vector<int> currentBookings;
     vector<string> paymentMethods;
 
 public:
+    vector<Booking*> bookings;
+        
     Customer(string n, string e, string p) : User(n, e, p, "Customer") {}
 
     void createAccount() override {
@@ -312,9 +321,9 @@ public:
     }
 }
 
-    void bookRoom(string roomNo, string fromDate, string toDate, int guests, string paymentMethod, double price) {
+    void bookRoom(string roomNo, string fromDate, string toDate, int guests, string paymentMethod, double price, string email) {
         string bookingID = "B" + to_string(bookings.size() + 1); // Example of generating a booking ID
-        Booking* newBooking = new Booking(bookingID, roomNo, fromDate, toDate, guests, paymentMethod, price);
+        Booking* newBooking = new Booking(bookingID, roomNo, fromDate, toDate, guests, paymentMethod, price, email);
         bookings.push_back(newBooking);
         cout << "Booking confirmed! Your Booking ID: " << bookingID << endl;
     }
@@ -336,7 +345,7 @@ public:
         paymentMethods.push_back(paymentMethod);
     }
 
-    void viewBookingHistory() const {
+    void viewBookingHistory() override {
         cout << "Booking History for " << name << ":\n";
         for (auto& booking : bookings) {
             booking->displayBookingDetails();
@@ -464,6 +473,10 @@ class ParkInnLodge {
                 cout << "Booking has already been checked out." << endl;
             }
         }
+        
+        const vector<Booking*>& getBookings() const {
+            return bookings;
+        }
 
 };
 
@@ -557,8 +570,8 @@ void display() {
                                             paymentMethod = "Credit/Debit Card";
                                             break;
                                     }
-                                    double price = 2000; // Example room price, adjust based on room
-                                    customer->bookRoom(roomNo, fromDate, toDate, guests, paymentMethod, price);
+                                    double price = 2000;
+                                    customer->bookRoom(roomNo, fromDate, toDate, guests, paymentMethod, price, email);
                                 } else {
                                     cout << "Booking failed: room does not exist." << endl;
                                 }
@@ -674,7 +687,7 @@ void display() {
                             }
                             case 5: {
                                 cout << "----------Park Inn Lodge Generate Report----------\n";
-                                admin->generateReport();
+                                // admin->generateReport();
                                 break;
                             }
                             case 6:
@@ -748,3 +761,4 @@ int main() {
     C2B - Group 5 <3
     */
 }
+};
