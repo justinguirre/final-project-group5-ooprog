@@ -13,7 +13,7 @@ using namespace std;
 // - edit booking (nothing happens after entering booking id)
 // ~ edit account (nothing happens after typing 6)
 // - delete account (not working properly)
-// - view checkins and checkouts (not implemented yet)
+// - view checkins (not implemented yet)
 // - checkin (not implemented yet)
 // - generate report (not implemented yet)
 
