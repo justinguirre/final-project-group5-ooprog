@@ -14,7 +14,7 @@ using namespace std;
 // ~ edit account (nothing happens after typing 6)
 // - delete account (not working properly)
 // - view checkins (not implemented yet)
-// - checkin (not implemented yet)
+// + checkin/out (not implemented yet)
 // - generate report (not implemented yet)
 
 class Room {
@@ -66,7 +66,7 @@ public:
     void setBedSize(const string &size) { bedSize = size; }
 
     void displayRoomInfo() const override {
-        Room::displayRoomInfo();
+        Room::displayRoomInfo(); // ;)
         cout << "- Bed Size: " << bedSize << "\n" << endl;
     }
 };
@@ -130,6 +130,7 @@ private:
     PaymentMethod paymentMethod;
     double totalPrice;
     bool hasCheckedIn;
+    bool hasCheckedOut;
 
 public:
     Booking(string id, string room, string from, string to, int guests, PaymentMethod& payment, double price) 
@@ -148,9 +149,14 @@ public:
     double getTotalPrice() const { return totalPrice; }
     string getPaymentMethod() const { return paymentMethod; }
     bool getHasCheckedIn() const { return hasCheckedIn; }
+    bool getHasCheckedOut() const { return hasCheckedOut; }
 
     void setHasCheckedIn(bool val) {
         this->hasCheckedIn = val;
+    }
+
+    void setHasCheckedOut(bool val) {
+        this->hasCheckedOut = val;
     }
 };
 
@@ -356,7 +362,7 @@ public:
 
         for (auto it = rooms.begin(); it != rooms.end(); ++it) {
             if ((*it)->getRoomNo() == roomNo) {
-                delete *it;  // Delete room
+                // delete *it;  // Delete room
                 rooms.erase(it);  // Erase from vector
                 cout << "Room " << roomNo << " deleted successfully!\n";
                 return;
@@ -412,7 +418,7 @@ public:
         for (auto it = bookings.begin(); it != bookings.end(); ++it) {
             if ((*it)->getBookingID() == bookingID) {
                 cout << "Cancelling booking: " << bookingID << endl;
-                delete *it;
+                // delete *it;
                 bookings.erase(it);
                 cout << "Booking cancelled successfully.\n";
                 return;
@@ -529,21 +535,37 @@ class ParkInnLodge {
                 }
             }
         }
+
+        void checkIn(Booking& booking) {
+            if (!booking.getHasCheckedIn()) {
+                if (!booking.getHasCheckedOut()) {
+                    booking.setHasCheckedIn(true);
+                    cout << "Booking ID " << booking.getBookingID() << " successfully checked in!" << endl;
+                } else {
+                    cout << "Booking has already been checked out." << endl;
+                }
+            } else {
+                cout << "Booking ID " << booking.getBookingID() << " is already checked in." << endl;
+            }
+        }
+
+        void checkOut(Booking& booking) {
+            if (!booking.getHasCheckedIn()) {
+                cout << "Booking ID " << booking.getBookingID() << " has not checked in yet." << endl;
+            } else if (!booking.getHasCheckedOut()) {
+                booking.setHasCheckedOut(true);
+                cout << "Booking ID " << booking.getBookingID() << " successfully checked out!" << endl;
+            } else {
+                cout << "Booking has already been checked out." << endl;
+            }
+        }
+
 }
 
 void display() {
-
-}
-
-// Main function with hotel flow
-int main() {
     vector<User*> users;
     vector<Room*> rooms;
     bool running = true;
-
-    rooms.push_back(new DeluxeRoom("101", 5000.0));
-    rooms.push_back(new StandardRoom("102", 3000.0));
-    rooms.push_back(new SuiteRoom("201", 10000.0));
 
     // Create sample users
     users.push_back(new Employee("Employee Park Inn Lodge", "admin@example.com", "pil123"));
@@ -654,6 +676,11 @@ int main() {
                                 guestMenu = false;
                                 break;
                             }
+                            case 69: { // Spawn rooms
+                                rooms.push_back(new DeluxeRoom("101", 5000.0));
+                                rooms.push_back(new StandardRoom("102", 3000.0));
+                                rooms.push_back(new SuiteRoom("201", 10000.0));
+                            }
                             default:
                                 cout << "Invalid option. Try again.\n";
                         }
@@ -743,10 +770,42 @@ int main() {
                 cout << "Invalid option. Try again.\n";
         }
     }
+}
 
-    // Cleanup memory (deleting rooms, users, etc.)
-    for (auto user : users) delete user;
-    for (auto room : rooms) delete room;
+int main() {
+    display();
 
-    return 0;
+    /*
+    Dear Queen Beyoncé,
+
+    We hope this message finds you well. 
+    We’re writing to express our heartfelt gratitude for everything you represent 
+    and the immense impact your music has had on our lives, especially during our journey 
+    through Object-Oriented Programming. 
+
+    As a group that faced countless late nights and moments of doubt while tackling complex concepts, 
+    we found incredible solace and inspiration in your music. 
+    Your songs, from “Run the World (Girls)” to “Halo,” became our soundtrack during every coding session, 
+    reminding us that perseverance, strength, and belief in ourselves were key to overcoming challenges. 
+
+    There were times when the coding seemed too difficult, and we felt like giving up, 
+    but your powerful anthems fueled us to keep going, to dig deeper, and to never stop until we got it right. 
+    In those moments, we thought of how you’ve always pushed boundaries in your own career, 
+    and it gave us the courage to push through our struggles and keep moving forward.
+
+    Your music has always been a source of empowerment, but in this particular moment, 
+    it became more than just songs—-it became the very energy that carried us through to success. 
+    The confidence and resilience you exude, both on and off the stage, are qualities we aspire to embody in our own lives. 
+    In every note, every lyric, you remind us that there is no obstacle too great when we commit ourselves wholeheartedly. 
+
+    Thanks to your influence, we were able to tackle one of the most challenging subjects we’ve faced 
+    and come out successful on the other side. Passing our finals in Object-Oriented Programming 
+    is a victory we share with you, as your artistry helped us stay focused, determined, and relentless. 
+
+    Thank you for being not just a global icon but a beacon of light and strength for so many, 
+    including us. Your legacy continues to inspire and motivate us in ways words can hardly capture.
+
+    With all our love and deepest appreciation,  
+    C2B - Group 5 <3
+    */
 }
