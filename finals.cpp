@@ -53,6 +53,10 @@ bool doubleIsValid(double input) {
             break;
         }
     }
+    
+    if (inputString.empty()) {
+        isDoubleValid = false;
+    }
     return isDoubleValid;
 }
 
@@ -310,9 +314,18 @@ public:
         cin.clear();
         cin.ignore();
         cout << "Enter Price: ";
-        (cin >> ws, price);
-        cin.clear();
-        cin.ignore();
+        cin >> price;
+        // Check if input is valid
+        if (!cin) {  // Check if the input is in a bad state (non-integer input)
+            cin.clear();  // Clear the error flag
+            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+            cout << "Error: invalid input" << endl;
+            return;  // Skip to the next iteration of the loop
+        }
+        if (!doubleIsValid(price)) {
+            cout << "Error: invalid input" << endl;
+            return;
+        }
 
         Room* newRoom = nullptr;
 
@@ -440,13 +453,25 @@ public:
                 cout << "5. Save and Exit\n";
                 cout << "Enter your choice: ";
                 cin >> choice;
+                // Check if input is valid
+                if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                    cin.clear();  // Clear the error flag
+                    cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                    cout << "Error: invalid input" << endl;
+                    continue;  // Skip to the next iteration of the loop
+                }
+                
+                if (!intIsValid(choice)) {
+                    cout << "Error: invalid input" << endl;
+                    continue;
+                }
 
                 switch (choice) {
                     case 1: {
                         // Edit Check-in Date
                         string newFromDate;
                         cout << "Enter new Check-in Date (YYYY-MM-DD): ";
-                        cin >> newFromDate;
+                        getline(cin, newFromDate);
                         booking->editBookingDetails(newFromDate, booking->getToDate(), booking->getGuests(),
                                                     booking->getPaymentMethod(), booking->getTotalPrice());
                         cout << "Check-in date updated successfully.\n";
@@ -456,7 +481,7 @@ public:
                         // Edit Check-out Date
                         string newToDate;
                         cout << "Enter new Check-out Date (YYYY-MM-DD): ";
-                        cin >> newToDate;
+                        getline(cin, newToDate);
                         booking->editBookingDetails(booking->getFromDate(), newToDate, booking->getGuests(),
                                                     booking->getPaymentMethod(), booking->getTotalPrice());
                         cout << "Check-out date updated successfully.\n";
@@ -467,6 +492,18 @@ public:
                         int newGuests;
                         cout << "Enter new Number of Guests: ";
                         cin >> newGuests;
+                        // Check if input is valid
+                        if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                            cin.clear();  // Clear the error flag
+                            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                            cout << "Error: invalid input" << endl;
+                            continue;  // Skip to the next iteration of the loop
+                        }
+                        
+                        if (!intIsValid(newGuests)) {
+                            cout << "Error: invalid input" << endl;
+                            continue;
+                        }
                         double newPrice = 2000 * newGuests; // Example price recalculation
                         booking->editBookingDetails(booking->getFromDate(), booking->getToDate(), newGuests,
                                                     booking->getPaymentMethod(), newPrice);
@@ -479,6 +516,18 @@ public:
                         cout << "Choose Payment Method\n1. Cash\n2. Digital Wallet\n3. Credit/Debit Card): ";
                         int paymentChoice;
                         cin >> paymentChoice;
+                        // Check if input is valid
+                        if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                            cin.clear();  // Clear the error flag
+                            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                            cout << "Error: invalid input" << endl;
+                            continue;  // Skip to the next iteration of the loop
+                        }
+                        
+                        if (!intIsValid(paymentChoice)) {
+                            cout << "Error: invalid input" << endl;
+                            continue;
+                        }
                         switch (paymentChoice) {
                             case 1: newPaymentMethod = "Cash"; break;
                             case 2: newPaymentMethod = "Digital Wallet"; break;
@@ -748,7 +797,7 @@ void display() {
 
                                 do {
                                     cout << "Enter the Room ID you want to book: ";
-                                    cin >> roomNo;
+                                    getline(cin, roomNo);
                                 if (roomNo.empty()) {
                                     cout << "Room ID cannot be empty. Please enter a valid Room ID.\n";
                                     }
@@ -765,7 +814,7 @@ void display() {
 
                                 do {
                                     cout << "Enter Check-in Date (YYYY-MM-DD): ";
-                                    cin >> fromDate;
+                                    getline(cin, fromDate);
                                 if (!isValidDate(fromDate)) {
                                     cout << "Invalid date format. Please use YYYY-MM-DD.\n";
                                     }
@@ -783,6 +832,17 @@ void display() {
                                 do {
                                     cout << "Enter the Number of Guests (maximum 10): ";
                                     cin >> guests;
+                                    // Check if input is valid
+                                    if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                                        cin.clear();  // Clear the error flag
+                                        cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                                        cout << "Error: invalid input" << endl;
+                                        continue;  // Skip to the next iteration of the loop
+                                    }
+                                    if (!intIsValid(guests)) {
+                                        cout << "Error: invalid input" << endl;
+                                        continue;
+                                    }
                                     if (guests <= 0 || guests > 10) {
                                         cout << "Invalid number of guests. Please enter a value between 1 and 10.\n";
                                     }
@@ -793,6 +853,17 @@ void display() {
                                 do {
                                     cout << "Choose Payment Method (1: Cash, 2: Gcash, 3: Card): ";
                                     cin >> paymentChoice;
+                                    // Check if input is valid
+                                    if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                                        cin.clear();  // Clear the error flag
+                                        cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                                        cout << "Error: invalid input" << endl;
+                                        continue;  // Skip to the next iteration of the loop
+                                    }
+                                    if (!intIsValid(paymentChoice)) {
+                                        cout << "Error: invalid input" << endl;
+                                        continue;
+                                    }
                                     if (paymentChoice < 1 || paymentChoice > 3) {
                                         cout << "Invalid payment choice. Please select 1, 2, or 3.\n";
                                     }
@@ -814,6 +885,17 @@ void display() {
                                         do {
                                          cout << "Select Card Type (1: Credit, 2: Debit): ";
                                          cin >> cardTypeChoice;
+                                         // Check if input is valid
+                                        if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                                            cin.clear();  // Clear the error flag
+                                            cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                                            cout << "Error: invalid input" << endl;
+                                            continue;  // Skip to the next iteration of the loop
+                                        }
+                                        if (!intIsValid(cardTypeChoice)) {
+                                            cout << "Error: invalid input" << endl;
+                                            continue;
+                                        }
                                         if (cardTypeChoice == 1) {
                                          isCredit = true;
                                          paymentMethod = "Credit Card";
@@ -828,6 +910,13 @@ void display() {
                                         do {
                                             cout << "Enter Card Number (16 digits): ";
                                             cin >> cardNumber;
+                                            // Check if input is valid
+                                            if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                                                cin.clear();  // Clear the error flag
+                                                cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                                                cout << "Error: invalid input" << endl;
+                                                continue;  // Skip to the next iteration of the loop
+                                            }
                                             if (cardNumber.length() != 16 || !all_of(cardNumber.begin(), cardNumber.end(), ::isdigit)) {
                                                 cout << "Invalid card number. It must be exactly 16 digits.\n";
                                             }
@@ -837,6 +926,13 @@ void display() {
                                         do {
                                             cout << "Enter Expiration Date (MM/YY): ";
                                             cin >> expiration;
+                                            // Check if input is valid
+                                            if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                                                cin.clear();  // Clear the error flag
+                                                cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                                                cout << "Error: invalid input" << endl;
+                                                continue;  // Skip to the next iteration of the loop
+                                            }
 
                                             regex expPattern("^\\d{2}/\\d{2}$");
                                             if (!regex_match(expiration, expPattern)) {
@@ -868,6 +964,13 @@ void display() {
                                         do {
                                             cout << "Enter Card PIN (4 digits): ";
                                             cin >> pin;
+                                            // Check if input is valid
+                                            if (!cin) {  // Check if the input is in a bad state (non-integer input)
+                                                cin.clear();  // Clear the error flag
+                                                cin.ignore(10000, '\n');  // Ignore the invalid input in the buffer
+                                                cout << "Error: invalid input" << endl;
+                                                continue;  // Skip to the next iteration of the loop
+                                            }
                                             if (pin.length() != 4 || !all_of(pin.begin(), pin.end(), ::isdigit)) {
                                                 cout << "Invalid PIN. It must be exactly 4 digits.\n";
                                             }
