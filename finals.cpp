@@ -4,6 +4,8 @@
 #include <string>
 #include <limits>
 #include <algorithm>
+#include <memory>
+#include <regex>
 using namespace std;
 
 // * TO-DO:
@@ -18,6 +20,58 @@ using namespace std;
 // - view checkins (not implemented yet)
 // + checkin/out (not implemented yet)
 // - generate report (not implemented yet)
+
+bool intIsValid(int input) {
+    bool isIntValid = true;
+    string inputString = to_string(input);
+    if (input <= 0) {
+        isIntValid = false;
+    }
+    for (char c: inputString) {
+        if (!isdigit(c)) {
+            isIntValid = false;
+            break;
+        }
+    }
+    return isIntValid;
+}
+
+bool doubleIsValid(double input) {
+    bool isDoubleValid = true;
+    string inputString = to_string(input);
+
+    if (input <= 0) {
+        isDoubleValid = false;
+    }
+    for (char c : inputString) {
+        if (!isdigit(c) && c != '.') {
+            isDoubleValid = false;
+            break;
+        }
+    }
+    return isDoubleValid;
+}
+
+string toUpper(string str) {
+    for (int i = 0; i < str.length(); i++) {
+        if (str[i] >= 'a' && str[i] <= 'z') {
+            str[i] = str[i] - 32; // Convert lowercase to uppercase
+        }
+    }
+    return str;
+}
+
+bool idIsValid(string idInput) {
+    if (idInput == "") {
+        return false;
+    }
+    for (char c : idInput) {
+        if (!isalnum(c)) {
+            return false;
+        }
+    }
+    return true;
+}
 
 class Room {
 protected:
@@ -155,10 +209,29 @@ public:
     }
 
     string getBookingID() const { return bookingID; }
-    double getTotalPrice() const { return totalPrice; }
+    string getFromDate() const { return fromDate; }
+    string getToDate() const { return toDate; }
+    int getGuests() const { return guests; }
     string getPaymentMethod() const { return paymentMethod; }
+    string getRoomNo() const { return roomNo; }
+    double getTotalPrice() const { return totalPrice; }
     bool getHasCheckedIn() const { return hasCheckedIn; }
     bool getHasCheckedOut() const { return hasCheckedOut; }
+
+    // Setter methods
+    void setFromDate(string newFromDate) { fromDate = newFromDate; }
+    void setToDate(string newToDate) { toDate = newToDate; }
+    void setGuests(int newGuests) { guests = newGuests; }
+    void setPaymentMethod(string newPaymentMethod) { paymentMethod = newPaymentMethod; }
+    void setTotalPrice(double newPrice) { totalPrice = newPrice; }
+
+    void editBookingDetails(string newFromDate, string newToDate, int newGuests, string newPaymentMethod, double newTotalPrice) {
+        fromDate = newFromDate;
+        toDate = newToDate;
+        guests = newGuests;
+        paymentMethod = newPaymentMethod;
+        totalPrice = newTotalPrice;
+    }
     void setHasCheckedIn(bool val) {
         this->hasCheckedIn = val;
     }
@@ -169,6 +242,7 @@ public:
 };
 
 class User {
+    vector<User*> users;
 protected:
     string name, email, password, role;
 
@@ -179,8 +253,7 @@ public:
     string getPassword() { return password; }
     string getRole() { return role; }
     
-    virtual void viewBookingHistory() = 0;
-    
+    virtual ~User() {}
 
     // Getter for role
     string getRole() const { return role; }
@@ -200,6 +273,9 @@ public:
 };
 
 class Employee : public User {
+    vector<User*> users;
+private:
+    vector<Booking*> bookings;
 public:
     Employee(string n, string e, string p) : User(n, e, p, "Employee") {}
 
@@ -216,14 +292,23 @@ public:
         double price;
 
         cout << "Enter Room Number: ";
-        cin >> roomNo;
-        cout << "Enter Room Type: ";
-        cin >> roomType;
-        cout << "Enter Features: ";
+        getline(cin, roomNo);
+        roomNo = toUpper(roomNo);
+        cin.clear();
         cin.ignore();
+        cout << "Enter Room Type: ";
+        getline(cin, roomType);
+        roomType = toUpper(roomType);
+        cin.clear();
+        cin.ignore();
+        cout << "Enter Features: ";
         getline(cin, features);
+        cin.clear();
+        cin.ignore();
         cout << "Enter Price: ";
-        cin >> price;
+        (cin, price);
+        cin.clear();
+        cin.ignore();
 
         Room* newRoom = nullptr;
 
@@ -246,7 +331,10 @@ public:
         string roomNo;
 
         cout << "Enter Room Number to delete: ";
-        cin >> roomNo;
+        getline(cin, roomNo);
+        roomNo = toUpper(roomNo);
+        cin.clear();
+        cin.ignore();
 
         for (auto it = rooms.begin(); it != rooms.end(); ++it) {
             if ((*it)->getRoomNo() == roomNo) {
@@ -289,6 +377,7 @@ class Customer : public User {
     vector<string> paymentHistory;
     vector<int> currentBookings;
     vector<string> paymentMethods;
+    vector<User*> users;
 
 public:
     vector<Booking*> bookings;
@@ -302,7 +391,9 @@ public:
     bool deleteAccount(vector<User*>& users) {
     string passEntered;
     cout << "Confirm password to delete account: ";
-    cin >> passEntered;
+    getline(cin, passEntered);
+    cin.clear();
+    cin.ignore();
 
     if (passEntered == password) {
         auto it = std::find_if(users.begin(), users.end(),
@@ -328,6 +419,90 @@ public:
         cout << "Booking confirmed! Your Booking ID: " << bookingID << endl;
     }
 
+    void editBooking(string bookingID) {
+    for (auto& booking : bookings) {
+        if (booking->getBookingID() == bookingID) {
+            cout << "\nEditing Booking ID: " << bookingID << endl;
+            int choice;
+            bool done = false;
+
+            while (!done) {
+                // Display menu options for editing
+                cout << "\nSelect the detail to edit:\n";
+                cout << "1. Check-in Date\n";
+                cout << "2. Check-out Date\n";
+                cout << "3. Number of Guests\n";
+                cout << "4. Payment Method\n";
+                cout << "5. Save and Exit\n";
+                cout << "Enter your choice: ";
+                cin >> choice;
+
+                switch (choice) {
+                    case 1: {
+                        // Edit Check-in Date
+                        string newFromDate;
+                        cout << "Enter new Check-in Date (YYYY-MM-DD): ";
+                        cin >> newFromDate;
+                        booking->editBookingDetails(newFromDate, booking->getToDate(), booking->getGuests(),
+                                                    booking->getPaymentMethod(), booking->getTotalPrice());
+                        cout << "Check-in date updated successfully.\n";
+                        break;
+                    }
+                    case 2: {
+                        // Edit Check-out Date
+                        string newToDate;
+                        cout << "Enter new Check-out Date (YYYY-MM-DD): ";
+                        cin >> newToDate;
+                        booking->editBookingDetails(booking->getFromDate(), newToDate, booking->getGuests(),
+                                                    booking->getPaymentMethod(), booking->getTotalPrice());
+                        cout << "Check-out date updated successfully.\n";
+                        break;
+                    }
+                    case 3: {
+                        // Edit Number of Guests
+                        int newGuests;
+                        cout << "Enter new Number of Guests: ";
+                        cin >> newGuests;
+                        double newPrice = 2000 * newGuests; // Example price recalculation
+                        booking->editBookingDetails(booking->getFromDate(), booking->getToDate(), newGuests,
+                                                    booking->getPaymentMethod(), newPrice);
+                        cout << "Number of guests updated successfully.\n";
+                        break;
+                    }
+                    case 4: {
+                        // Edit Payment Method
+                        string newPaymentMethod;
+                        cout << "Choose Payment Method\n1. Cash\n2. Digital Wallet\n3. Credit/Debit Card): ";
+                        int paymentChoice;
+                        cin >> paymentChoice;
+                        switch (paymentChoice) {
+                            case 1: newPaymentMethod = "Cash"; break;
+                            case 2: newPaymentMethod = "Digital Wallet"; break;
+                            case 3: newPaymentMethod = "Credit/Debit Card"; break;
+                            default: newPaymentMethod = booking->getPaymentMethod(); break;
+                        }
+                        booking->editBookingDetails(booking->getFromDate(), booking->getToDate(), booking->getGuests(),
+                                                    newPaymentMethod, booking->getTotalPrice());
+                        cout << "Payment method updated successfully.\n";
+                        break;
+                    }
+                    case 5: {
+                        // Save changes and exit
+                        done = true;
+                        cout << "Changes saved successfully.\n";
+                        break;
+                    }
+                    default: {
+                        cout << "Invalid choice. Please try again.\n";
+                    }
+                }
+            }
+            return;
+        }
+    }
+    cout << "Booking ID not found.\n";
+}
+
     void cancelBooking(string bookingID) {
         for (auto it = bookings.begin(); it != bookings.end(); ++it) {
             if ((*it)->getBookingID() == bookingID) {
@@ -345,7 +520,7 @@ public:
         paymentMethods.push_back(paymentMethod);
     }
 
-    void viewBookingHistory() override {
+    void viewBookingHistory() {
         cout << "Booking History for " << name << ":\n";
         for (auto& booking : bookings) {
             booking->displayBookingDetails();
@@ -450,29 +625,27 @@ class ParkInnLodge {
             }
         }
 
-        void checkIn(Booking& booking) {
-            if (!booking.getHasCheckedIn()) {
-                if (!booking.getHasCheckedOut()) {
-                    booking.setHasCheckedIn(true);
-                    cout << "Booking ID " << booking.getBookingID() << " successfully checked in!" << endl;
-                } else {
-                    cout << "Booking has already been checked out." << endl;
-                }
-            } else {
-                cout << "Booking ID " << booking.getBookingID() << " is already checked in." << endl;
-            }
+         void viewCheckIns(const vector<pair<string, string>>& checkIns) const {
+        cout << "------ Check-Ins ------\n";
+        if (checkIns.empty()) {
+            cout << "No check-ins to display.\n";
+            return;
         }
+        for (const auto& entry : checkIns) {
+            cout << "Guest Name: " << entry.first << ", Room No: " << entry.second << endl;
+        }
+    }
 
-        void checkOut(Booking& booking) {
-            if (!booking.getHasCheckedIn()) {
-                cout << "Booking ID " << booking.getBookingID() << " has not checked in yet." << endl;
-            } else if (!booking.getHasCheckedOut()) {
-                booking.setHasCheckedOut(true);
-                cout << "Booking ID " << booking.getBookingID() << " successfully checked out!" << endl;
-            } else {
-                cout << "Booking has already been checked out." << endl;
-            }
+    void viewCheckOuts(const vector<pair<string, string>>& checkOuts) const {
+        cout << "------ Check-Outs ------\n";
+        if (checkOuts.empty()) {
+            cout << "No check-outs to display.\n";
+            return;
         }
+        for (const auto& entry : checkOuts) {
+            cout << "Guest Name: " << entry.first << ", Room No: " << entry.second << endl;
+        }
+    }
         
         const vector<Booking*>& getBookings() const {
             return bookings;
@@ -480,12 +653,14 @@ class ParkInnLodge {
 
 };
 
+bool isValidRoomID(const string& roomID);
+bool isValidDate(const string& date);
+
 void display() {
     vector<User*> users;
     vector<Room*> rooms;
     bool running = true;
 
-    // Create sample users
     users.push_back(new Employee("Employee Park Inn Lodge", "admin@example.com", "pil123"));
     users.push_back(new Customer("John Doe", "john@example.com", "pil456"));
 
@@ -497,15 +672,22 @@ void display() {
         cout << "4. Exit\n";
         cout << "Choose an option: ";
         int choice;
-        cin >> choice;
+        (cin, choice);
+        cin.clear();
+        cin.ignore();
 
         switch (choice) {
             case 1: { // Guest Login
                 string email, password;
                 cout << "Enter Email: ";
-                cin >> email;
+                getline(cin, email);
+                email = toUpper(email);
+                cin.clear();
+                cin.ignore();
                 cout << "Enter Password: ";
-                cin >> password;
+                getline(cin, password);
+                cin.clear();
+                cin.ignore();
 
                 User* loggedInUser = User::login(users, email, password);
                 if (loggedInUser && loggedInUser->getRole() == "Customer") {  // Using the getter
@@ -523,7 +705,9 @@ void display() {
                         cout << "7. Logout\n";
                         cout << "Choose an option: ";
                         int guestOption;
-                        cin >> guestOption;
+                        (cin, guestOption);
+                        cin.clear();
+                        cin.ignore();
 
                         switch (guestOption) {
                             case 1: { // View Available Rooms
@@ -540,48 +724,151 @@ void display() {
 
                                 cout << "----------Park Inn Lodge Book Room----------\n";
 
-                                cout << "Enter the Room ID you want to book: ";
-                                cin >> roomNo;
-                                bool found = false;
-                                for (auto& rewm : rooms) {
-                                    if (roomNo == rewm->getRoomNo()) {
-                                        found = true;
+                                do {
+                                    cout << "Enter the Room ID you want to book: ";
+                                    cin >> roomNo;
+                                if (roomNo.empty()) {
+                                    cout << "Room ID cannot be empty. Please enter a valid Room ID.\n";
                                     }
-                                }
-                    
-                                if (found) {
+                                } while (roomNo.empty());
+
+    
+                                auto isValidDate = [](const string& date) -> bool {
+                                    if (date.length() != 10 || date[4] != '-' || date[7] != '-') return false;
+                                    for (int i = 0; i < date.length(); ++i) {
+                                        if ((i != 4 && i != 7) && !isdigit(date[i])) return false;
+                                    }
+                                    return true;
+                                };
+
+                                do {
                                     cout << "Enter Check-in Date (YYYY-MM-DD): ";
                                     cin >> fromDate;
+                                if (!isValidDate(fromDate)) {
+                                    cout << "Invalid date format. Please use YYYY-MM-DD.\n";
+                                    }
+                                } while (!isValidDate(fromDate));
+
+                                do {
                                     cout << "Enter Check-out Date (YYYY-MM-DD): ";
                                     cin >> toDate;
-                                    cout << "Enter the Number of Guests: ";
-                                    cin >> guests;
-                                    cout << "Choose Payment Method (1: Cash, 2: Digital Wallet, 3: Credit/Debit Card): ";
-                                    int paymentChoice;
-                                    cin >> paymentChoice;
-                                    switch (paymentChoice) {
-                                        case 1:
-                                            paymentMethod = "Cash";
-                                            break;
-                                        case 2: 
-                                            paymentMethod = "Digital Wallet";
-                                            break;
-                                        case 3:
-                                            paymentMethod = "Credit/Debit Card";
-                                            break;
-                                    }
-                                    double price = 2000;
-                                    customer->bookRoom(roomNo, fromDate, toDate, guests, paymentMethod, price, email);
-                                } else {
-                                    cout << "Booking failed: room does not exist." << endl;
+                                if (!isValidDate(toDate)) {
+                                    cout << "Invalid date format. Please use YYYY-MM-DD.\n";
                                 }
+                                    } while (!isValidDate(toDate));
+
+    
+                                do {
+                                    cout << "Enter the Number of Guests (maximum 10): ";
+                                    cin >> guests;
+                                    if (guests <= 0 || guests > 10) {
+                                        cout << "Invalid number of guests. Please enter a value between 1 and 10.\n";
+                                    }
+                                    } while (guests <= 0 || guests > 10);
+
+    
+                                    int paymentChoice;
+                                do {
+                                    cout << "Choose Payment Method (1: Cash, 2: Gcash, 3: Card): ";
+                                    cin >> paymentChoice;
+                                    if (paymentChoice < 1 || paymentChoice > 3) {
+                                        cout << "Invalid payment choice. Please select 1, 2, or 3.\n";
+                                    }
+                                } while (paymentChoice < 1 || paymentChoice > 3);
+
+                                switch (paymentChoice) {
+                                    case 1:
+                                        paymentMethod = "Cash";
+                                        break;
+                                    case 2:
+                                        paymentMethod = "Gcash";
+                                        break;
+                                    case 3: {
+                                        
+                                        string cardNumber, expiration, pin;
+                                        bool isCredit;
+                                        
+                                        int cardTypeChoice;
+                                        do {
+                                         cout << "Select Card Type (1: Credit, 2: Debit): ";
+                                         cin >> cardTypeChoice;
+                                        if (cardTypeChoice == 1) {
+                                         isCredit = true;
+                                         paymentMethod = "Credit Card";
+                                        } else if (cardTypeChoice == 2) {
+                                         isCredit = false;
+                                         paymentMethod = "Debit Card";
+                                        } else {
+                                        cout << "Invalid choice. Please select 1 for Credit or 2 for Debit.\n";
+                                             }
+                                        } while (cardTypeChoice != 1 && cardTypeChoice != 2);
+                                        
+                                        do {
+                                            cout << "Enter Card Number (16 digits): ";
+                                            cin >> cardNumber;
+                                            if (cardNumber.length() != 16 || !all_of(cardNumber.begin(), cardNumber.end(), ::isdigit)) {
+                                                cout << "Invalid card number. It must be exactly 16 digits.\n";
+                                            }
+                                        } while (cardNumber.length() != 16 || !all_of(cardNumber.begin(), cardNumber.end(), ::isdigit));
+
+                                        
+                                        do {
+                                            cout << "Enter Expiration Date (MM/YY): ";
+                                            cin >> expiration;
+
+                                            regex expPattern("^\\d{2}/\\d{2}$");
+                                            if (!regex_match(expiration, expPattern)) {
+                                                cout << "Invalid expiration date format. Use MM/YY.\n";
+                                                continue;
+                                            }
+
+                                            int expMonth, expYear;
+                                            sscanf(expiration.c_str(), "%d/%d", &expMonth, &expYear);
+                                            if (expMonth < 1 || expMonth > 12) {
+                                                cout << "Invalid month in expiration date. Please try again.\n";
+                                                continue;
+                                            }
+
+                                           
+                                            time_t now = time(nullptr);
+                                            tm* current = localtime(&now);
+                                            int currentYear = (current->tm_year % 100); 
+                                            int currentMonth = current->tm_mon + 1;    
+
+                                            if (expYear < currentYear || (expYear == currentYear && expMonth < currentMonth)) {
+                                                cout << "Card is expired. Please use a valid card.\n";
+                                                continue;
+                                            }
+                                            break;
+                                        } while (true);
+
+                                      
+                                        do {
+                                            cout << "Enter Card PIN (4 digits): ";
+                                            cin >> pin;
+                                            if (pin.length() != 4 || !all_of(pin.begin(), pin.end(), ::isdigit)) {
+                                                cout << "Invalid PIN. It must be exactly 4 digits.\n";
+                                            }
+                                        } while (pin.length() != 4 || !all_of(pin.begin(), pin.end(), ::isdigit));
+
+                                        paymentMethod = "Debit Card"; 
+                                        break;
+                                    }
+                                }
+
+                                double price = 2000; 
+                                customer->bookRoom(roomNo, fromDate, toDate, guests, paymentMethod, price, customer->getEmail());
                                 break;
+
                             }
                             case 3: { // Edit Booking
                                 string bookingID;
                                 cout << "----------Park Inn Lodge Edit Booking----------\n";
                                 cout << "Enter Booking ID to edit: ";
-                                cin >> bookingID;
+                                getline(cin, bookingID);
+                                bookingID = toUpper(bookingID);
+                                cin.clear();
+                                cin.ignore();
                                 // Add logic to edit booking details here.
                                 break;
                             }
@@ -589,7 +876,10 @@ void display() {
                                 string bookingID;
                                 cout << "----------Park Inn Lodge Cancel Booking----------\n";
                                 cout << "Enter Booking ID to cancel: ";
-                                cin >> bookingID;
+                                getline(cin, bookingID);
+                                bookingID = toUpper(bookingID);
+                                cin.clear();
+                                cin.ignore();
                                 customer->cancelBooking(bookingID);
                                 break;
                             }
@@ -601,7 +891,9 @@ void display() {
                             case 6: { // Delete Account
                                 string passEntered;
                                 cout << "Enter password to delete account: ";
-                                cin >> passEntered;
+                                getline(cin, passEntered);
+                                cin.clear();
+                                cin.ignore();
                                 
                                 if (customer->getPassword() == passEntered) {
                                     if (customer->deleteAccount(users)) {
@@ -634,9 +926,12 @@ void display() {
             case 2: { // Employee Login
                 string email, password;
                 cout << "Enter Email: ";
-                cin >> email;
+                getline(cin, email);
+                email = toUpper(email);
+                cin.clear();
+                cin.ignore();
                 cout << "Enter Password: ";
-                cin >> password;
+                getline(cin, password);
 
                 User* loggedInEmployee = User::login(users, email, password);
                 if (loggedInEmployee && loggedInEmployee->getRole() == "Employee") {
@@ -651,7 +946,9 @@ void display() {
                         cout << "6. Logout\n";
                         cout << "Enter your choice: ";
                         int adminChoice;
-                        cin >> adminChoice;
+                        (cin, adminChoice);
+                        cin.clear();
+                        cin.ignore();
                         switch (adminChoice) {
                             case 1: {
                                 cout << "----------Park Inn Lodge Adding Rooms----------\n";
@@ -662,7 +959,9 @@ void display() {
                                 string passEntered;
                                 cout << "----------Park Inn Lodge Deleting Rooms----------\n";
                                 cout << "Enter password to delete room: ";
-                                cin >> passEntered;
+                                getline(cin, passEntered);
+                                cin.clear();
+                                cin.ignore();
                                 
                                 if (admin->getPassword() == passEntered) {
                                     admin->deleteRoom(rooms);
@@ -703,11 +1002,19 @@ void display() {
             case 3: { // Register as Customer
                 string name, email, password;
                 cout << "Enter your Name: ";
-                cin >> name;
+                getline(cin, name);
+                name = toUpper(name);
+                cin.clear();
+                cin.ignore();
                 cout << "Enter your Email: ";
-                cin >> email;
+                getline(cin, email);
+                name = toUpper(email);
+                cin.clear();
+                cin.ignore();
                 cout << "Enter your Password: ";
-                cin >> password;
+                getline(cin, password);
+                cin.clear();
+                cin.ignore();
 
                 User* newCustomer = new Customer(name, email, password);
                 newCustomer->createAccount();
@@ -727,38 +1034,4 @@ void display() {
 int main() {
     display();
 
-    /*
-    Dear Queen Beyoncé,
-
-    We hope this message finds you well. 
-    We’re writing to express our heartfelt gratitude for everything you represent 
-    and the immense impact your music has had on our lives, especially during our journey 
-    through Object-Oriented Programming. 
-
-    As a group that faced countless late nights and moments of doubt while tackling complex concepts, 
-    we found incredible solace and inspiration in your music. 
-    Your songs, from “Run the World (Girls)” to “Halo,” became our soundtrack during every coding session, 
-    reminding us that perseverance, strength, and belief in ourselves were key to overcoming challenges. 
-
-    There were times when the coding seemed too difficult, and we felt like giving up, 
-    but your powerful anthems fueled us to keep going, to dig deeper, and to never stop until we got it right. 
-    In those moments, we thought of how you’ve always pushed boundaries in your own career, 
-    and it gave us the courage to push through our struggles and keep moving forward.
-
-    Your music has always been a source of empowerment, but in this particular moment, 
-    it became more than just songs—-it became the very energy that carried us through to success. 
-    The confidence and resilience you exude, both on and off the stage, are qualities we aspire to embody in our own lives. 
-    In every note, every lyric, you remind us that there is no obstacle too great when we commit ourselves wholeheartedly. 
-
-    Thanks to your influence, we were able to tackle one of the most challenging subjects we’ve faced 
-    and come out successful on the other side. Passing our finals in Object-Oriented Programming 
-    is a victory we share with you, as your artistry helped us stay focused, determined, and relentless. 
-
-    Thank you for being not just a global icon but a beacon of light and strength for so many, 
-    including us. Your legacy continues to inspire and motivate us in ways words can hardly capture.
-
-    With all our love and deepest appreciation,  
-    C2B - Group 5 <3
-    */
 }
-};
