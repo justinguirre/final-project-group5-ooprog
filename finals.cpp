@@ -24,6 +24,7 @@ protected:
     double price;
     bool isAvailable;
     string features;
+    string bookingId;
 
 public:
     Room(string no, string type, double p, string f)
@@ -34,11 +35,13 @@ public:
     double getRoomPrice() const { return price; }
     bool getRoomAvailability() const { return isAvailable; }
     string getRoomFeatures() const { return features; }
+    string getBookingId() const ( return bookingId; )
 
     void setRoomNo(const string &no) { this->roomNo = no; }
     void setRoomType(const string &type) { this->roomType = type; }
     void setRoomPrice(double p) { this->price = p; }
     void setRoomAvailability(bool available) { isAvailable = available; }
+    void setBookingId(string bookingid) { this->bookingId = bookingid; } 
 
     virtual void displayRoomInfo() const {
         cout << "[ID: " << roomNo << "] " << roomType << "\n"
@@ -124,15 +127,16 @@ private:
     string roomNo;
     string fromDate;
     string toDate;
-    string paymentMethod;
+    PaymentMethod paymentMethod;
     double totalPrice;
+    bool hasCheckedIn;
 
 public:
-    Booking(string id, string room, string from, string to, int guests, string payment, double price) 
-        : bookingID(id), roomNo(room), fromDate(from), toDate(to), paymentMethod(payment), totalPrice(price) {}
+    Booking(string id, string room, string from, string to, int guests, PaymentMethod& payment, double price) 
+        : bookingID(id), roomNo(room), fromDate(from), toDate(to), paymentMethod(payment), totalPrice(price), hasCheckedIn(false) {}
 
     void displayBookingDetails() const {
-        cout << "Booking ID: " << bookingID << endl
+        cout << setprecision(2) << fixed << "Booking ID: " << bookingID << endl
              << "Room: " << roomNo << endl
              << "Check-in: " << fromDate << endl
              << "Check-out: " << toDate << endl
@@ -143,6 +147,11 @@ public:
     string getBookingID() const { return bookingID; }
     double getTotalPrice() const { return totalPrice; }
     string getPaymentMethod() const { return paymentMethod; }
+    bool getHasCheckedIn() const { return hasCheckedIn; }
+
+    void setHasCheckedIn(bool val) {
+        this->hasCheckedIn = val;
+    }
 };
 
 class PaymentMethod {
@@ -428,6 +437,7 @@ class ParkInnLodge {
     private:
         vector<User*> users;
         vector<Room*> rooms;
+        vector<Booking*> bookings;
     
     public:
         void createAccount(Customer& customer) {
@@ -462,11 +472,11 @@ class ParkInnLodge {
             }
         }
 
-        void editRoom(Room& room, string toEdit, string newRoomNo) {
+        void editRoom(Room& room, string toEdit, string newValue) {
             if (toEdit == "ROOMNO") {
                 bool found = false;
                 for (auto& rewm : rooms) {
-                    if (newRoomNo == rewm.getRoomNo()) {
+                    if (newValue == rewm.getRoomNo()) {
                         cout << "Room number already exists!" << endl;
                         found = true;
                         break;
@@ -474,10 +484,50 @@ class ParkInnLodge {
                 }
 
                 if (!found) {
-                    room.setRoomNo(newRoomNo);
+                    room.setRoomNo(newValue);
                     cout << "Room number changed successfully!" << endl;
                 }
-            } else if
+            } else if (toEdit == "ROOMPRICE") {
+                room.setRoomPrice(stod(newValue));
+                cout << "Room price changed successfully!" << endl;
+            } else if (toEdit == "ROOMAVAIL") {
+                room.setRoomAvailability(newValue == "TRUE" || newValue == "true");
+                cout << "Room availability changed successfully!" << endl;
+            } else {
+                cout << "Invalid parameters!" << endl;
+            }
+        }
+
+        void deleteRoom(Room& room) {
+            auto it = remove_if(rooms.begin(), rooms.end(),
+                [&roomToDelete](const Room& room) {
+                    return room.getRoomNo() == roomToDelete.getRoomNo();  // Compare by room number
+                });
+
+            // Check if the room was found and removed
+            if (it != rooms.end()) {
+                rooms.erase(it, rooms.end());  // Erase the element from the vector
+                cout << "Room deleted successfully!" << endl;
+            } else {
+                cout << "Room not found!" << endl;
+            }
+        }
+
+        void bookRoom(const Booking& booking) {
+            bookings.push_back(booking);
+            cout << "Booking success!" << endl;
+        }
+
+        void viewAvailableRooms() {
+            if (rooms.empty()) {
+                cout << "No rooms available." << endl;
+                return;
+            }
+            for (const auto& room : rooms) {
+                if (room.getRoomAvailability()) {
+                    room.displayRoomInfo();
+                }
+            }
         }
 }
 
