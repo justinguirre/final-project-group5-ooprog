@@ -665,7 +665,7 @@ void display() {
     users.push_back(new Customer("John Doe", "john@example.com", "pil456"));
 
     while (running) {
-        cout << "Hotel Management System\n";
+        cout << "\nHotel Management System\n";
         cout << "1. Guest Login\n";
         cout << "2. Employee Login\n";
         cout << "3. Register as Customer\n";
@@ -1032,6 +1032,7 @@ void display() {
 }
 
 int main() {
+     cout << "\nGroup 5 - Casanova, Cruzat, Gonzales, Guirre\n";
     display();
 
 }
